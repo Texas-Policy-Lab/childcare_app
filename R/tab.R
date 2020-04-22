@@ -10,3 +10,9 @@ ui_element.default <- function(tab, world, state, county, ...) {
 ui_element.tab1 <- function(tab, demand, ...) {
   demand.ui(demand)
 }
+
+ui_element.tab2 <- function(tab, ...) {
+  # shiny::includeHTML(
+  #   "./README.html"
+  # )
+}
