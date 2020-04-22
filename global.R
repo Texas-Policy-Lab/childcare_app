@@ -1,0 +1,12 @@
+library(magrittr)
+library(ggplot2)
+library(scales)
+library(plyr)
+
+rm(list = ls())
+options(encoding = "UTF-8")
+tpltheme::set_tpl_theme(style = "print", font = "lato")
+
+sapply(list.files("R", full.names = TRUE, recursive = TRUE), source, .GlobalEnv)
+
+config <- yaml::read_yaml("./mainDashboard.yaml")
