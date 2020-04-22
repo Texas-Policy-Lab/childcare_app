@@ -10,5 +10,9 @@ ui:
   tabs:
     tab1: 
       menu_title: "Childcare centers"
-      icon: ""
+      icon: "child"
       page_title: "Childcare centers"
+    tab2:
+      menu_title: "Documentation"
+      icon: "book"
+      page_title: "Documentation"
