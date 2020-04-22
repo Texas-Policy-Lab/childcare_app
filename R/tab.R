@@ -7,6 +7,6 @@ ui_element.default <- function(tab, world, state, county, ...) {
 }
 
 # This tab corresponds to tab 1 in the `mainDashboard.yaml` file
-ui_element.tab1 <- function(tab, world, ...) {
-  return(NULL)
+ui_element.tab1 <- function(tab, demand, ...) {
+  demand.ui(demand)
 }
