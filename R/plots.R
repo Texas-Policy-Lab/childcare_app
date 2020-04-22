@@ -19,12 +19,13 @@ theme_map <- function(...) {
 
 map_cbsa <- function(df,
                      caption = "Data collected from: https://covid.yale.edu/innovation/mapping/childcare/") {
-
-  gg <- ggplot(df) +
-    ggiraph::geom_polygon_interactive(aes(x = long, y = lat,
-                                          group = subregion, fill = cbsa_title,
-                                          tooltip = glue::glue("{cbsa_title}<br>Demand: {demand}")),
-                                      color = "white") +
+  gg <- ggplot(df, aes(x = long, y = lat, group = subregion, fill = cbsa_title)) +
+    geom_polygon(fill = "grey",
+                 color = "white") +
+    ggiraph::geom_polygon_interactive(data = df %>% 
+                                        dplyr::filter(!is.na(cbsa_cd)),
+                                      aes(tooltip =  glue::glue("{cbsa_title}<br>Demand: {demand}"))
+                                      ) +
     coord_map() +
     theme_map() + 
     labs(x = NULL, 
