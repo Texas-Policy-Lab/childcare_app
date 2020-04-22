@@ -1,0 +1,14 @@
+version: "0.0.1"
+css: "www/css"
+js: "www/js"
+favicon: "images/favicon.png"
+
+ui:
+  dashboardtitle:
+    title: "Open Childcare centers"
+    wide: 350
+  tabs:
+    tab1: 
+      menu_title: "Childcare centers"
+      icon: ""
+      page_title: "Childcare centers"
