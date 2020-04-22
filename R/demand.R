@@ -1,3 +1,21 @@
+widget.cbsa <- function(demand) {
+
+  shinyWidgets::pickerInput(
+    inputId = "CBSA",
+    label = "Area", 
+    choices = c("All", demand %>% 
+                  dplyr::distinct(CBSA) %>%
+                  dplyr::pull(CBSA)),
+    multiple = FALSE,
+    options = list(
+      `actions-box` = TRUE, 
+      size = 10,
+      `selected-text-format` = "count > 3",
+      `live-search` = TRUE
+    )
+  )
+}
+
 widget.employment_sector <- function(demand) {
   
   radioButtons(inputId = "employment_sector",
@@ -24,6 +42,7 @@ demand.ui <- function(demand) {
 
   shiny::fluidRow(
     shiny::column(width = 2,
+                  widget.cbsa(demand),
                   widget.employment_sector(demand),
                   widget.other_child_care_provider(demand)
     ),
@@ -37,6 +56,7 @@ demand.ui <- function(demand) {
 demand.server <- function(input, output, session) {
 
   demand_sub <- shiny::reactive({
+
     demand %>%
       dplyr::filter(employment_sector %in% input$employment_sector) %>%
       dplyr::filter(other_child_care_provider %in% input$other_child_care_provider)
@@ -44,9 +64,16 @@ demand.server <- function(input, output, session) {
 
   tx_counties_df <- shiny::reactive({
  
-    tx_counties %>% 
+    df <- tx_counties %>% 
       dplyr::left_join(demand_sub()) %>%
       dplyr::mutate(demand = all_children)
+    
+    if(input$CBSA != "All") {
+      df %>% 
+        dplyr::filter(CBSA %in% input$CBSA)
+    } else {
+      df
+    }
   })
 
   output$demand_map <- ggiraph::renderGirafe({
