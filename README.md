@@ -1,7 +1,3 @@
-# childcare_app
-
-Childcare supply and demand application
-
 ## Data
 
 ### Childcare data
