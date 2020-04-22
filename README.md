@@ -10,4 +10,4 @@ The childcare demand data by CBSA were collected from Yale's Childcare COVID-19 
 
 ### CBSA 
 
-CBSA data are from the [Census Bureau](https://www.census.gov/geographies/reference-files/time-series/demo/metro-micro/delineation-files.html). This project utilizes the CBSA data from February 2013 which can be downloaded [here](https://www2.census.gov/programs-surveys/metro-micro/geographies/reference-files/2013/delineation-files/list1.xls). Data is used from 2013 becaus
+CBSA data are from the [Census Bureau](https://www.census.gov/geographies/reference-files/time-series/demo/metro-micro/delineation-files.html). This project utilizes the CBSA data from February 2013 which can be downloaded [here](https://www2.census.gov/programs-surveys/metro-micro/geographies/reference-files/2013/delineation-files/list1.xls). Data is used from 2013 because the CPS_IPUMS variable metfips uses geographical coding from Febrary 2013.
