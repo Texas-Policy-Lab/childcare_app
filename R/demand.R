@@ -107,7 +107,7 @@ demand.server <- function(input, output, session) {
     map_cbsa(df = tx_counties_df())
   })
 
-  df <- shiny::reactive({
+  table <- shiny::reactive({
 
     est_ccs_df() %>%
       dplyr::left_join(est_demand(), by = c("county", "workforce_board")) %>% 
@@ -119,25 +119,34 @@ demand.server <- function(input, output, session) {
       dplyr::arrange(value) %>% 
       dplyr::rename(County = county,
                     `Seats per 100 children` = value)
-
+    
+  })
+  
+  pageLength <- shiny::reactive({
+    if (length(input$wfbPicker) == 1) {
+      return(nrow(table()))
+    } else {
+      return(10)
+    }
+  })
+  
+  paging <- shiny::reactive({
+    if (length(input$wfbPicker) == 1){
+      return(FALSE)
+    } else {
+      return(TRUE)
+    }
   })
   
   output$estimate_table <- DT::renderDataTable(
-    DT::datatable(df(), options = list(searching = FALSE), rownames= FALSE)
+
+    DT::datatable(table(), 
+                  rownames= FALSE,
+                  options = list(searching = FALSE,
+                                 pageLength = pageLength(),
+                                 paging = paging()
+                                )
+                  )
   )
-  # output$low_supply <- renderText({
-  #   
-  #   cntys <- est() %>% 
-  #     dplyr::distinct(county) %>% 
-  #     dplyr::pull(county)
-  #   
-  #   n <- length(cntys)
-  #   
-  #   cntys <- paste(cntys, collapse = ", ")
-  #   
-  #   paste(cntys, " ", n, ", counties have low seats per 100 under all supply and demand settings")
-  #   
-  #   
-  # })
-  
+
 }
