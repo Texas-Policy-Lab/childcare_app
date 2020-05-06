@@ -26,16 +26,28 @@ wfb <- readr::read_csv(here::here("./data/workforce_board_county.csv")) %>%
                 workforce_board = stringr::str_trim(gsub(pattern, "", workforce_board), "both")
                 )
 
-estimates <- readr::read_csv("./data/Potential_supply_demand_county_5520.csv") %>% 
-  dplyr::select(county, dplyr::starts_with("ccs_per_100")) %>% 
+est <- readr::read_csv("./data/Potential_supply_demand_county_5520.csv") %>% 
   dplyr::left_join(wfb %>% 
-                     dplyr::mutate(county = paste(county, "County", sep = " "))) %>% 
+                     dplyr::mutate(county = paste(county, "County", sep = " ")))
+
+est_ccs <- est %>% 
+  dplyr::select(county, workforce_board, dplyr::starts_with("ccs_per_100")) %>% 
   tidyr::gather(variable, value , -c(county, workforce_board)) %>% 
   dplyr::mutate(fill = ifelse(value > 35, "> 35",
                               ifelse(value <= 35 & value > 15, "> 15 & <= 35", "< 15")),
                 demand = ifelse(grepl("occ", variable), "Occupation", "Industry"),
                 supply = ifelse(grepl("low", variable), "Low",
                                 ifelse(grepl("med", variable), "Medium", "High")))
+
+est_d <- est %>% 
+  dplyr::select(county, workforce_board, dplyr::starts_with("Demand")) %>% 
+  tidyr::gather(variable, value , -c(county, workforce_board)) %>% 
+  dplyr::mutate(variable = ifelse(grepl("Occupation", variable), "Occupation", "Industry"))
+
+est_s <- est %>% 
+  dplyr::select(county, workforce_board, dplyr::contains("supply")) %>% 
+  tidyr::gather(variable, value , -c(county, workforce_board)) %>% 
+  dplyr::mutate(variable = gsub(" supply scenario", "", variable))
 
 tx_counties <- ggplot2::map_data("county", region = "texas") %>% 
   dplyr::mutate(subregion = stringr::str_trim(subregion, "both"),
