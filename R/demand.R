@@ -19,9 +19,9 @@ widget.wfb <- function(wfb) {
   )
 }
 
-widget.demand <- function(estimates) {
+widget.demand <- function(est_ccs) {
 
-  all <- estimates %>% 
+  all <- est_ccs %>% 
     dplyr::distinct(demand) %>% 
     dplyr::pull(demand)
   
@@ -31,9 +31,9 @@ widget.demand <- function(estimates) {
                       selected = all[1])
 }
 
-widget.supply <- function(estimates) {
+widget.supply <- function(est_ccs) {
 
-  all <- estimates %>% 
+  all <- est_ccs %>% 
     dplyr::distinct(supply) %>% 
     dplyr::pull(supply)
 
@@ -43,13 +43,13 @@ widget.supply <- function(estimates) {
                       selected = all[1])
 }
 
-demand.ui <- function(wfb, estimates) {
+demand.ui <- function(wfb, est_css) {
 
   shiny::fluidRow(
     shiny::fluidRow(
       shiny::column(width = 2,
-                    widget.demand(estimates),
-                    widget.supply(estimates),
+                    widget.demand(est_ccs),
+                    widget.supply(est_ccs),
                     widget.wfb(wfb)
                     ),
       shiny::column(width = 8
@@ -65,32 +65,79 @@ demand.ui <- function(wfb, estimates) {
     ),
   
     shiny::fluidRow(
-      shiny::textOutput("low_supply")
+      shiny::column(width = 12, 
+                    DT::dataTableOutput("estimate_table", width = "90%"))
     )
   )
 }
 
 demand.server <- function(input, output, session) {
 
+  est_supply <- shiny::reactive({
+    est_s %>% 
+      dplyr::filter(variable %in% input$supplyRadio) %>% 
+      dplyr::filter(workforce_board %in% input$wfbPicker) %>% 
+      dplyr::rename(Supply = value)
+  })
+  
+  est_demand <- shiny::reactive({
+    est_d %>% 
+      dplyr::filter(variable %in% input$demandRadio) %>% 
+      dplyr::filter(workforce_board %in% input$wfbPicker) %>% 
+      dplyr::rename(Demand = value)
+  })
+  
+  est_ccs_df <- shiny::reactive({
+    est_ccs %>% 
+      dplyr::filter(demand %in% input$demandRadio) %>% 
+      dplyr::filter(supply %in% input$supplyRadio) %>% 
+      dplyr::filter(workforce_board %in% input$wfbPicker)
+  })
+
   tx_counties_df <- shiny::reactive({
 
     tx_counties %>%
       dplyr::filter(workforce_board %in% input$wfbPicker) %>% 
-      dplyr::left_join(estimates %>% 
-                         dplyr::mutate(county = gsub(" County", "", county)) %>% 
-                         dplyr::filter(demand %in% input$demandRadio) %>% 
-                         dplyr::filter(supply %in% input$supplyRadio))
+      dplyr::left_join(est_ccs_df() %>% 
+                         dplyr::mutate(county = gsub(" County", "", county))
+                       )
   })
 
-  est <- shiny::reactive({
-    sum_est <- estimates %>%
-      dplyr::group_by(county, fill) %>% 
-      dplyr::summarize(n = dplyr::n()) %>% 
-      dplyr::filter(fill == "< 15" & n == 6)
-  })
-  
   output$demand_map <- ggiraph::renderGirafe({
     map_cbsa(df = tx_counties_df())
   })
 
+  df <- shiny::reactive({
+
+    est_ccs_df() %>%
+      dplyr::left_join(est_demand(), by = c("county", "workforce_board")) %>% 
+      dplyr::left_join(est_supply(), by = c("county", "workforce_board")) %>% 
+      dplyr::mutate(Demand = format(round(Demand, 0), nsmall = 0),
+                    Supply = format(round(Supply, 0), nsmall = 0),
+                    value = format(round(value, 0), nsmall = 0)) %>% 
+      dplyr::select(county, Demand, Supply, value) %>% 
+      dplyr::arrange(value) %>% 
+      dplyr::rename(County = county,
+                    `Seats per 100 children` = value)
+
+  })
+  
+  output$estimate_table <- DT::renderDataTable(
+    DT::datatable(df(), options = list(searching = FALSE), rownames= FALSE)
+  )
+  # output$low_supply <- renderText({
+  #   
+  #   cntys <- est() %>% 
+  #     dplyr::distinct(county) %>% 
+  #     dplyr::pull(county)
+  #   
+  #   n <- length(cntys)
+  #   
+  #   cntys <- paste(cntys, collapse = ", ")
+  #   
+  #   paste(cntys, " ", n, ", counties have low seats per 100 under all supply and demand settings")
+  #   
+  #   
+  # })
+  
 }
