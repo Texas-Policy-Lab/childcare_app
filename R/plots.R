@@ -20,11 +20,12 @@ theme_map <- function(...) {
 map_cbsa <- function(df,
                      covid_df,
                      show_covid,
-                     caption = "COVID-19 Source: DSHS data reported on 05/06/2020") {
+                     caption = "COVID-19 Source: DSHS data reported on 05/06/2020",
+                     tt = "County: {county}<br>Seats: {value}<br>COVID Cases: {Cases}<br>COVID Deaths: {Deaths}") {
 
   gg <- ggplot(df, aes(x = long, y = lat)) +
     ggiraph::geom_polygon_interactive(aes(group = subregion, fill = est, 
-                                            tooltip =  glue::glue("County: {county}<br>Seats: {value}")),
+                                            tooltip =  glue::glue(tt)),
                                         color = "white"
                                         ) +
     coord_map() +

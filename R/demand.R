@@ -117,7 +117,7 @@ demand.server <- function(input, output, session) {
                                           group = mean(group),
                                           subregion = unique(subregion)))
   })
-  
+
   est_ccs_df <- shiny::reactive({
     est_ccs %>% 
       dplyr::filter(demand %in% input$demandRadio) %>% 
@@ -130,7 +130,14 @@ demand.server <- function(input, output, session) {
       dplyr::filter(workforce_board %in% input$wfbPicker) %>% 
       dplyr::left_join(est_ccs_df() %>% 
                          dplyr::mutate(county = gsub(" County", "", county))
-                       )
+                       ) %>% 
+      dplyr::left_join(covid %>% 
+                         dplyr::filter(workforce_board %in% input$wfbPicker) %>% 
+                         dplyr::select(-workforce_board) %>% 
+                         tidyr::spread(variable, value) %>% 
+                         dplyr::rename(county = County,
+                                       Cases = `Confirmed cases`))
+    
 
     })
   
@@ -153,13 +160,13 @@ demand.server <- function(input, output, session) {
       dplyr::arrange(value) %>% 
       dplyr::rename(County = county,
                     `Seats per 100 children` = value) %>% 
-      dplyr::full_join(covid %>% 
+      dplyr::left_join(covid %>% 
                          dplyr::filter(workforce_board %in% input$wfbPicker) %>% 
                          dplyr::mutate(County = paste(County, "County")) %>% 
                          dplyr::select(-workforce_board) %>% 
                          tidyr::spread(variable, value))
   })
-  
+
   pageLength <- shiny::reactive({
     if (length(input$wfbPicker) == 1) {
       return(nrow(table()))
