@@ -19,3 +19,8 @@
   --black: #000000;
   --white: #ffffff;
 }
+
+#estimate_table {
+  margin-left: 20px;
+  margin-bottom: 20px;
+}
