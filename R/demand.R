@@ -152,8 +152,12 @@ demand.server <- function(input, output, session) {
       dplyr::select(county, Demand, Supply, value) %>% 
       dplyr::arrange(value) %>% 
       dplyr::rename(County = county,
-                    `Seats per 100 children` = value)
-    
+                    `Seats per 100 children` = value) %>% 
+      dplyr::full_join(covid %>% 
+                         dplyr::filter(workforce_board %in% input$wfbPicker) %>% 
+                         dplyr::mutate(County = paste(County, "County")) %>% 
+                         dplyr::select(-workforce_board) %>% 
+                         tidyr::spread(variable, value))
   })
   
   pageLength <- shiny::reactive({
