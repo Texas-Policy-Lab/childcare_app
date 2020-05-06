@@ -5,13 +5,13 @@ favicon: "images/favicon.png"
 
 ui:
   dashboardtitle:
-    title: "Open Childcare centers"
-    wide: 350
+    title: "Frontline Child Care"
+    wide: 500
   tabs:
     tab1: 
       menu_title: "Childcare centers"
       icon: "child"
-      page_title: "Childcare centers"
+      page_title: "Texas Essential Worker Child Care Supply and Demand"
     tab2:
       menu_title: "Documentation"
       icon: "book"

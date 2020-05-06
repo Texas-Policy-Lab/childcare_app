@@ -1,56 +1,95 @@
-widget.employment_sector <- function(demand) {
+widget.wfb <- function(wfb) {
+
+  all <- wfb %>% 
+    dplyr::distinct(workforce_board) %>% 
+    dplyr::pull(workforce_board)
   
-  radioButtons(inputId = "employment_sector",
-               label = "Employment sector",
-               choices = demand %>% 
-                     dplyr::distinct(employment_sector) %>%
-                     dplyr::pull(employment_sector), 
-               selected = "All Industries",
-               inline = FALSE, width = NULL)
+  shinyWidgets::pickerInput(
+    inputId = "wfbPicker",
+    label = "Workforce Board", 
+    choices = all,
+    multiple = TRUE,
+    selected = all,
+    options = list(
+      `actions-box` = TRUE, 
+      size = 10,
+      `selected-text-format` = "count > 3",
+      `live-search` = TRUE
+    )
+  )
 }
 
-widget.other_child_care_provider <- function(demand) {
+widget.demand <- function(estimates) {
 
-  radioButtons(inputId = "other_child_care_provider",
-               label = "Other Child Care provider",
-               choices = demand %>% 
-                 dplyr::distinct(other_child_care_provider) %>%
-                 dplyr::pull(other_child_care_provider), 
-               selected = "All",
-               inline = FALSE, width = NULL)
+  all <- estimates %>% 
+    dplyr::distinct(demand) %>% 
+    dplyr::pull(demand)
+  
+  shiny::radioButtons("demandRadio",
+                      "Demand Setting",
+                      choices = all,
+                      selected = all[1])
 }
 
-demand.ui <- function(demand) {
+widget.supply <- function(estimates) {
+
+  all <- estimates %>% 
+    dplyr::distinct(supply) %>% 
+    dplyr::pull(supply)
+
+  shiny::radioButtons("supplyRadio",
+                      "Supply Setting",
+                      choices = all,
+                      selected = all[1])
+}
+
+demand.ui <- function(wfb, estimates) {
 
   shiny::fluidRow(
-    shiny::column(width = 2,
-                  widget.employment_sector(demand),
-                  widget.other_child_care_provider(demand)
+    shiny::fluidRow(
+      shiny::column(width = 2,
+                    widget.demand(estimates),
+                    widget.supply(estimates),
+                    widget.wfb(wfb)
+                    ),
+      shiny::column(width = 8
+                    ,ggiraph::girafeOutput("demand_map")
+      ),
+      shiny::column(width =2,
+      shiny::fluidRow(
+                   shinydashboard::valueBox(value = "", subtitle = "High estimate", color = "red", width = 12)
+                  ,shinydashboard::valueBox(value = "", subtitle = "Medium estimate", color = "red", width = 12)
+                  ,shinydashboard::valueBox(value = "", subtitle = "Conservative estimate", color = "red", width = 12)
+      )
+      )
     ),
-    shiny::column(width = 7
-                  ,ggiraph::girafeOutput("demand_map")
-    ),
-    shiny::column(width = 3)
+  
+    shiny::fluidRow(
+      shiny::textOutput("low_supply")
+    )
   )
 }
 
 demand.server <- function(input, output, session) {
 
-  demand_sub <- shiny::reactive({
-    demand %>%
-      dplyr::filter(employment_sector %in% input$employment_sector) %>%
-      dplyr::filter(other_child_care_provider %in% input$other_child_care_provider)
-  })
-
   tx_counties_df <- shiny::reactive({
- 
-    tx_counties %>% 
-      dplyr::left_join(demand_sub()) %>%
-      dplyr::mutate(demand = all_children)
+
+    tx_counties %>%
+      dplyr::filter(workforce_board %in% input$wfbPicker) %>% 
+      dplyr::left_join(estimates %>% 
+                         dplyr::mutate(county = gsub(" County", "", county)) %>% 
+                         dplyr::filter(demand %in% input$demandRadio) %>% 
+                         dplyr::filter(supply %in% input$supplyRadio))
   })
 
+  est <- shiny::reactive({
+    sum_est <- estimates %>%
+      dplyr::group_by(county, fill) %>% 
+      dplyr::summarize(n = dplyr::n()) %>% 
+      dplyr::filter(fill == "< 15" & n == 6)
+  })
+  
   output$demand_map <- ggiraph::renderGirafe({
-
     map_cbsa(df = tx_counties_df())
   })
 

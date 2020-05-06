@@ -47,13 +47,13 @@ sidebar_panel <- function(tabs) {
                              tabName = tab$id,
                              icon = shiny::icon(tab$icon))
   })
-  
+
   sidebar <- shinydashboard::dashboardSidebar(
     shinydashboard::sidebarMenu(
       tab_id_html
     )
   )
-  
+
   return(sidebar)
 }
 
@@ -61,15 +61,18 @@ sidebar_panel <- function(tabs) {
 #' @description Creates basic structure for main panel
 #' @inheritParams create_tab_ids
 #' @export
-main_panel <- function(tabs, demand) {
+main_panel <- function(tabs, wfb, tx_counties, estimates) {
   
-  x <- lapply(tabs, function(tab, demand)
+  x <- lapply(tabs, function(tab, wfb, tx_counties, estimates)
     shinydashboard::tabItem(
       tabName = tab$id
       ,shiny::div(shiny::span(tab$page_title)
                   ,class = "page-title")
-      ,ui_element(tab = tab, demand = demand)
-    ), demand = demand)
+      ,ui_element(tab = tab,
+                  wfb = wfb,
+                  tx_counties = tx_counties,
+                  estimates = estimates)
+    ), wfb = wfb, tx_counties = tx_counties, estimates = estimates)
   
   body <- shinydashboard::dashboardBody(
     shiny::div(class= "tab-content", x)
@@ -86,7 +89,7 @@ main_panel <- function(tabs, demand) {
 #' @param favicon_pth path the favicon file
 #' @inheritParams logo
 #' @export
-tpl_ui <- function(title, tabs, css_pth, js_pth, favicon_pth, demand) {
+tpl_ui <- function(title, tabs, css_pth, js_pth, favicon_pth, wfb, tx_counties, estimates) {
   
   tabs <- create_tab_ids(tabs = tabs)
   
@@ -94,7 +97,10 @@ tpl_ui <- function(title, tabs, css_pth, js_pth, favicon_pth, demand) {
   
   sidebar <- sidebar_panel(tabs = tabs)
   
-  body <- main_panel(tabs = tabs, demand = demand) 
+  body <- main_panel(tabs = tabs,
+                     wfb = wfb,
+                     tx_counties = tx_counties,
+                     estimates = estimates) 
   
   ui <- shiny::shinyUI(
     shiny::fluidPage(

@@ -3,4 +3,6 @@ ui <- tpl_ui(title = config$ui$dashboardtitle$title
              ,js_pth = list.files(config$js, full.names = TRUE)
              ,css_pth = list.files(config$css, full.names = TRUE)
              ,favicon_pth = config$favicon
-             ,demand = demand)
+             ,wfb = wfb
+             ,tx_counties = tx_counties
+             ,estimates = estimates)
