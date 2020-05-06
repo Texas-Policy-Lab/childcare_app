@@ -5,4 +5,6 @@ ui <- tpl_ui(title = config$ui$dashboardtitle$title
              ,favicon_pth = config$favicon
              ,wfb = wfb
              ,tx_counties = tx_counties
-             ,estimates = estimates)
+             ,est_ccs = est_ccs
+             ,est_d = est_d
+             ,est_s = est_s)
