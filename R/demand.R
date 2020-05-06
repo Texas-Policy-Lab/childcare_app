@@ -26,7 +26,7 @@ widget.demand <- function(est_ccs) {
     dplyr::pull(demand)
   
   shiny::radioButtons("demandRadio",
-                      "Demand Setting",
+                      label = NULL,
                       choices = all,
                       selected = all[1])
 }
@@ -38,29 +38,49 @@ widget.supply <- function(est_ccs) {
     dplyr::pull(supply)
 
   shiny::radioButtons("supplyRadio",
-                      "Supply Setting",
+                      label = NULL,
                       choices = all,
                       selected = all[1])
+}
+
+widget.overlay_covid <- function() {
+  shinyWidgets::switchInput(
+    inputId = "show_covid"
+  )
+}
+
+widget.covid_metric <- function() {
+  shiny::radioButtons("covid_metric",
+                      label = NULL,
+                      choices = c("Confirmed Cases", "Deaths"),
+                      selected = "Confirmed Cases")
 }
 
 demand.ui <- function(wfb, est_css) {
 
   shiny::fluidRow(
     shiny::fluidRow(
-      shiny::column(width = 2,
-                    widget.demand(est_ccs),
-                    widget.supply(est_ccs),
-                    widget.wfb(wfb)
+      shiny::column(width = 3,
+                    widget.wfb(wfb),
+                    shiny::tags$div(
+                      class = "est-container",
+                      shiny::h3("Childcare"),
+                      shiny::h4("Demand estimated by"),
+                      widget.demand(est_ccs),
+                      shiny::h4("Supply scenarios"),
+                      widget.supply(est_ccs)
                     ),
-      shiny::column(width = 8
+                    shiny::tags$div(
+                      class = "covid-container",
+                      shiny::h3("Overlay COVID-19 Metrics"),
+                      shiny::h4("On/Off"),
+                      widget.overlay_covid(),
+                      shiny::h4("Metric"),
+                      widget.covid_metric()
+                    )
+                    ),
+      shiny::column(width = 9
                     ,ggiraph::girafeOutput("demand_map")
-      ),
-      shiny::column(width =2,
-      shiny::fluidRow(
-                   shinydashboard::valueBox(value = "", subtitle = "High estimate", color = "red", width = 12)
-                  ,shinydashboard::valueBox(value = "", subtitle = "Medium estimate", color = "red", width = 12)
-                  ,shinydashboard::valueBox(value = "", subtitle = "Conservative estimate", color = "red", width = 12)
-      )
       )
     ),
   
