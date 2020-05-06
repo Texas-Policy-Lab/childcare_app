@@ -108,7 +108,7 @@ demand.server <- function(input, output, session) {
     covid %>% 
       dplyr::filter(variable %in% input$covid_metric) %>% 
       dplyr::filter(workforce_board %in% input$wfbPicker) %>% 
-      dplyr::rename(covid_metric = value,
+      dplyr::rename(`Total #` = value,
                     county = County) %>% 
       dplyr::left_join(tx_counties %>% 
                          dplyr::group_by(county) %>% 
@@ -133,11 +133,12 @@ demand.server <- function(input, output, session) {
                        )
 
     })
-
+  
   output$demand_map <- ggiraph::renderGirafe({
 
     map_cbsa(df = tx_counties_df(),
-             covid_df = covid_df())
+             covid_df = covid_df(),
+             show_covid = input$show_covid)
   })
 
   table <- shiny::reactive({

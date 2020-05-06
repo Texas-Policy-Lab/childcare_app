@@ -19,6 +19,7 @@ theme_map <- function(...) {
 
 map_cbsa <- function(df,
                      covid_df,
+                     show_covid,
                      caption = "COVID-19 Source: DSHS data reported on 05/06/2020") {
 
   gg <- ggplot(df, aes(x = long, y = lat)) +
@@ -26,8 +27,6 @@ map_cbsa <- function(df,
                                             tooltip =  glue::glue("County: {county}<br>Seats: {value}")),
                                         color = "white"
                                         ) +
-    geom_point(data = covid_df,
-               aes(x=long, y=lat, size = covid_metric), alpha = .75, color = "#e54e4d") +
     coord_map() +
     theme_map() +
     labs(x = NULL,
@@ -54,6 +53,14 @@ map_cbsa <- function(df,
                                   color = "#939184")
     ) +
     scale_fill_manual("Seats per 100", values=c("#ee9391", "#b199bf", "#5c67b1"), na.value = "grey")
- 
+  if(show_covid) {
+    gg <- gg +
+      geom_point(data = covid_df,
+                 aes(x=long, y=lat, size = `Total #`), alpha = .75, color = "#e54e4d")
+  } else {
+    gg <- gg
+  }
+    
+
   gg <- ggiraph::girafe(ggobj = gg)
 }
