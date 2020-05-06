@@ -52,8 +52,8 @@ widget.overlay_covid <- function() {
 widget.covid_metric <- function() {
   shiny::radioButtons("covid_metric",
                       label = NULL,
-                      choices = c("Confirmed Cases", "Deaths"),
-                      selected = "Confirmed Cases")
+                      choices = c("Confirmed cases", "Deaths"),
+                      selected = "Confirmed cases")
 }
 
 demand.ui <- function(wfb, est_css) {
@@ -80,13 +80,10 @@ demand.ui <- function(wfb, est_css) {
                     )
                     ),
       shiny::column(width = 9
-                    ,ggiraph::girafeOutput("demand_map")
+                    ,fluidRow(ggiraph::girafeOutput("demand_map"))
+                    ,fluidRow(DT::dataTableOutput("estimate_table", width = "85%"))
+
       )
-    ),
-  
-    shiny::fluidRow(
-      shiny::column(width = 12, 
-                    DT::dataTableOutput("estimate_table", width = "90%"))
     )
   )
 }
@@ -107,6 +104,20 @@ demand.server <- function(input, output, session) {
       dplyr::rename(Demand = value)
   })
   
+  covid_df <- shiny::reactive({
+    covid %>% 
+      dplyr::filter(variable %in% input$covid_metric) %>% 
+      dplyr::filter(workforce_board %in% input$wfbPicker) %>% 
+      dplyr::rename(covid_metric = value,
+                    county = County) %>% 
+      dplyr::left_join(tx_counties %>% 
+                         dplyr::group_by(county) %>% 
+                         dplyr::summarise(long = mean(long, na.rm = TRUE),
+                                          lat = mean(lat, na.rm = TRUE),
+                                          group = mean(group),
+                                          subregion = unique(subregion)))
+  })
+  
   est_ccs_df <- shiny::reactive({
     est_ccs %>% 
       dplyr::filter(demand %in% input$demandRadio) %>% 
@@ -115,16 +126,18 @@ demand.server <- function(input, output, session) {
   })
 
   tx_counties_df <- shiny::reactive({
-
     tx_counties %>%
       dplyr::filter(workforce_board %in% input$wfbPicker) %>% 
       dplyr::left_join(est_ccs_df() %>% 
                          dplyr::mutate(county = gsub(" County", "", county))
                        )
-  })
+
+    })
 
   output$demand_map <- ggiraph::renderGirafe({
-    map_cbsa(df = tx_counties_df())
+
+    map_cbsa(df = tx_counties_df(),
+             covid_df = covid_df())
   })
 
   table <- shiny::reactive({
