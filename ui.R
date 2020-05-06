@@ -7,4 +7,5 @@ ui <- tpl_ui(title = config$ui$dashboardtitle$title
              ,tx_counties = tx_counties
              ,est_ccs = est_ccs
              ,est_d = est_d
-             ,est_s = est_s)
+             ,est_s = est_s
+             ,covid = covid)
