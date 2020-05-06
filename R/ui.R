@@ -61,9 +61,9 @@ sidebar_panel <- function(tabs) {
 #' @description Creates basic structure for main panel
 #' @inheritParams create_tab_ids
 #' @export
-main_panel <- function(tabs, wfb, tx_counties, estimates) {
+main_panel <- function(tabs, wfb, tx_counties, est_ccs, est_d, est_s) {
   
-  x <- lapply(tabs, function(tab, wfb, tx_counties, estimates)
+  x <- lapply(tabs, function(tab, wfb, tx_counties, est_ccs, est_d, est_s)
     shinydashboard::tabItem(
       tabName = tab$id
       ,shiny::div(shiny::span(tab$page_title)
@@ -71,8 +71,14 @@ main_panel <- function(tabs, wfb, tx_counties, estimates) {
       ,ui_element(tab = tab,
                   wfb = wfb,
                   tx_counties = tx_counties,
-                  estimates = estimates)
-    ), wfb = wfb, tx_counties = tx_counties, estimates = estimates)
+                  est_ccs = est_ccs,
+                  est_d = est_d,
+                  est_s = est_s)
+    ), wfb = wfb,
+       tx_counties = tx_counties,
+       est_ccs = est_ccs,
+       est_d = est_d,
+       est_s = est_s)
   
   body <- shinydashboard::dashboardBody(
     shiny::div(class= "tab-content", x)
@@ -89,7 +95,7 @@ main_panel <- function(tabs, wfb, tx_counties, estimates) {
 #' @param favicon_pth path the favicon file
 #' @inheritParams logo
 #' @export
-tpl_ui <- function(title, tabs, css_pth, js_pth, favicon_pth, wfb, tx_counties, estimates) {
+tpl_ui <- function(title, tabs, css_pth, js_pth, favicon_pth, wfb, tx_counties, est_ccs, est_s, est_d) {
   
   tabs <- create_tab_ids(tabs = tabs)
   
@@ -100,7 +106,9 @@ tpl_ui <- function(title, tabs, css_pth, js_pth, favicon_pth, wfb, tx_counties, 
   body <- main_panel(tabs = tabs,
                      wfb = wfb,
                      tx_counties = tx_counties,
-                     estimates = estimates) 
+                     est_ccs = est_ccs,
+                     est_d = est_d,
+                     est_s = est_s) 
   
   ui <- shiny::shinyUI(
     shiny::fluidPage(
