@@ -7,6 +7,6 @@ ui_element.default <- function(tab, ...) {
 }
 
 # This tab corresponds to tab 1 in the `mainDashboard.yaml` file
-ui_element.tab1 <- function(tab, wfb, estimates, ...) {
-  demand.ui(wfb = wfb, estimates = estimates)
+ui_element.tab1 <- function(tab, wfb, est_ccs, est_d, est_s, ...) {
+  demand.ui(wfb = wfb, est_css = est_css)
 }
