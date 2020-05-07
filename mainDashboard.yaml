@@ -16,3 +16,9 @@ ui:
       menu_title: "Documentation"
       icon: "book"
       page_title: "Documentation"
+data:
+  wfb: "./data/workforce_board_county.csv"
+  tx_counties: "./data/tx_counties.csv"
+  estimates: "./data/Potential_supply_demand_county_5520.csv"
+  cases: "./data/covid/confirmed.csv"
+  deaths: "./data/covid/deaths.csv"
