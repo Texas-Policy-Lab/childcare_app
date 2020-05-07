@@ -54,6 +54,7 @@ map_cbsa <- function(df,
                                   color = "#939184")
     ) +
     scale_fill_manual("Seats per 100", values=c("#ee9391", "#b199bf", "#5c67b1"), na.value = "grey")
+
   if(show_covid) {
     gg <- gg +
       geom_point(data = covid_df,
@@ -61,7 +62,6 @@ map_cbsa <- function(df,
   } else {
     gg <- gg
   }
-    
 
-  gg <- ggiraph::girafe(ggobj = gg)
+  gg <- ggiraph::girafe(ggobj = gg, width_svg = 9, height_svg = 6.5)
 }
