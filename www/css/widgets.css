@@ -244,3 +244,7 @@ input[type="checkbox"]:checked {
 .radio > label > span {
   font-size: 14px;
 }
+
+table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {
+    background-color: #ffffff;
+}
