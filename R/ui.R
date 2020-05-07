@@ -61,20 +61,18 @@ sidebar_panel <- function(tabs) {
 #' @description Creates basic structure for main panel
 #' @inheritParams create_tab_ids
 #' @export
-main_panel <- function(tabs, wfb, tx_counties, est_ccs, covid) {
+main_panel <- function(tabs, wfb, est_ccs, covid) {
   
-  x <- lapply(tabs, function(tab, wfb, tx_counties, est_ccs, covid)
+  x <- lapply(tabs, function(tab, wfb, est_ccs, covid)
     shinydashboard::tabItem(
       tabName = tab$id
       ,shiny::div(shiny::span(tab$page_title)
                   ,class = "page-title")
       ,ui_element(tab = tab,
                   wfb = wfb,
-                  tx_counties = tx_counties,
                   est_ccs = est_ccs,
                   covid = covid)
     ), wfb = wfb,
-       tx_counties = tx_counties,
        est_ccs = est_ccs,
        covid = covid)
 
@@ -94,7 +92,7 @@ main_panel <- function(tabs, wfb, tx_counties, est_ccs, covid) {
 #' @inheritParams logo
 #' @export
 tpl_ui <- function(title, tabs, css_pth, js_pth, favicon_pth,
-                   wfb, tx_counties, est_ccs, covid) {
+                   wfb, est_ccs, covid) {
   
   tabs <- create_tab_ids(tabs = tabs)
   
@@ -104,7 +102,6 @@ tpl_ui <- function(title, tabs, css_pth, js_pth, favicon_pth,
   
   body <- main_panel(tabs = tabs,
                      wfb = wfb,
-                     tx_counties = tx_counties,
                      est_ccs = est_ccs,
                      covid = covid) 
   
