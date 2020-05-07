@@ -11,6 +11,6 @@ ui_element.tab1 <- function(tab, wfb, est_ccs, covid = covid, ...) {
   demand.ui(wfb = wfb, est_ccs = est_ccs, covid = covid)
 }
 
-# ui_element.tab2 <- function(...) {
-#   docs.ui()
-# }
+ui_element.tab2 <- function(...) {
+  docs.ui()
+}
