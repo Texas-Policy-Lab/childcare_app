@@ -99,7 +99,7 @@ demand.ui <- function(wfb, est_ccs, covid) {
                     ),
                     shiny::tags$div(
                       class = "covid-container",
-                      shiny::h3("Overlay COVID-19 Metrics"),
+                      shiny::h3("Overlay DSHS COVID-19 Metrics"),
                       shiny::h4("On/Off"),
                       widget.overlay_covid(),
                       shiny::h4("Metric"),
@@ -121,7 +121,7 @@ demand.server <- function(input, output, session) {
     df <- filter.supply_type(df = est_ccs, input = input)
     df <- filter.demand_type(df = df, input = input)
 
-    df <- tx_counties %>% 
+    df <- map_tx_counties %>% 
       dplyr::left_join(df) %>% 
       dplyr::left_join(covid %>%
                          tidyr::spread(covid_metric, `Total # (COVID metrics)`) %>% 
@@ -134,7 +134,7 @@ demand.server <- function(input, output, session) {
     df <- filter.covid_metric(df = covid, input = input)
     df <- filter.wfb(df = df, input = input)
     df <- df %>% 
-          dplyr::left_join(tx_counties %>%
+          dplyr::left_join(map_tx_counties %>%
                              dplyr::group_by(county) %>%
                              dplyr::summarise(long = mean(long),
                                               lat = mean(lat),
@@ -161,7 +161,10 @@ demand.server <- function(input, output, session) {
       dplyr::rename(County = county,
                     Supply = est_supply,
                     Demand = est_demand,
-                    `Seats per 100 children` = est_ccs)
+                    `Seats per 100 children` = est_ccs) %>% 
+      dplyr::mutate(Demand = format(round(Demand, 0), nsmall = 0),
+                    Supply = format(round(Supply, 0), nsmall = 0),
+                    `Seats per 100 children` = format(round(`Seats per 100 children`, 0), nsmall = 0))
   })
 
   pageLength <- shiny::reactive({
