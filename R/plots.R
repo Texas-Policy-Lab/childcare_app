@@ -17,14 +17,14 @@ theme_map <- function(...) {
     )
 }
 
-map_cbsa <- function(df,
-                     covid_df,
+map_cbsa <- function(ccs_map_data = ccs_map_data,
+                     covid_map_data = covid_map_data,
                      show_covid,
                      caption = "COVID-19 Source: DSHS data reported on 05/06/2020",
-                     tt = "County: {county}<br>Seats: {value}<br>COVID Cases: {Cases}<br>COVID Deaths: {Deaths}") {
+                     tt = "County: {county}<br>Seats: {est_ccs}<br>COVID Cases: {Cases}<br>COVID Deaths: {Deaths}") {
 
-  gg <- ggplot(df, aes(x = long, y = lat)) +
-    ggiraph::geom_polygon_interactive(aes(group = subregion, fill = est, 
+  gg <- ggplot(ccs_map_data, aes(x = long, y = lat)) +
+    ggiraph::geom_polygon_interactive(aes(group = subregion, fill = label, 
                                             tooltip =  glue::glue(tt)),
                                         color = "white"
                                         ) +
@@ -53,12 +53,12 @@ map_cbsa <- function(df,
                                                   unit = "cm"),
                                   color = "#939184")
     ) +
-    scale_fill_manual("Seats per 100", values=c("#ee9391", "#b199bf", "#5c67b1"), na.value = "grey")
+    scale_fill_manual(stringr::str_wrap("Child care seats per 100 children", 16), values=c("#ee9391", "#b199bf", "#5c67b1"), na.value = "grey")
 
   if(show_covid) {
     gg <- gg +
-      geom_point(data = covid_df,
-                 aes(x=long, y=lat, size = `Total #`), alpha = .75, color = "#e54e4d")
+      geom_point(data = covid_map_data,
+                 aes(x=long, y=lat, size = `Total # (COVID metrics)`), alpha = .75, color = "#e54e4d")
   } else {
     gg <- gg
   }
