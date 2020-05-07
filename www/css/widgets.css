@@ -21,6 +21,13 @@ h3, th {
   margin-bottom: 3px;
 }
 
+h4 {
+  font-weight: normal;
+  font-size: 1em;
+  color: var(--grey-60-darker);
+  margin-top: 0;
+  margin-bottom: 3px;
+}
 /* Action Button */
 /*-----------------------------------------------------------------------*/
 .action-button {
