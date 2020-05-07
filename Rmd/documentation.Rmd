@@ -2,6 +2,10 @@
 output: html_document
 ---
 
+```{r, echo = FALSE}
+options(encoding = 'UTF-8')
+```
+
 ### Supply Estimates
 
 * Data were provided by TWC from the Frontline Operation list as of May 5, 2020, which indicates the location of child care providers that are currently open.
