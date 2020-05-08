@@ -31,8 +31,13 @@ tx_counties <- readr::read_csv(here::here("./data/tx_counties.csv")) %>%
   dplyr::mutate(county_name = paste(county, "County")) %>% 
   dplyr::left_join(wfb)
 
+row <- data.frame(wfb_id = 0, wfb_name = "All",
+                  stringsAsFactors = FALSE)
+
 wfb <- wfb %>% 
-  dplyr::distinct(wfb_id, wfb_name)
+  dplyr::distinct(wfb_id, wfb_name) %>%  
+  dplyr::bind_rows(row) %>%
+  dplyr::arrange(wfb_id)
 
 assertthat::assert_that(sum(is.na(tx_counties$wfb_id)) == 0)
 assertthat::assert_that(sum(is.na(tx_counties$wfb_name)) == 0)
