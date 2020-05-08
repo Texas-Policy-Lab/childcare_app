@@ -20,7 +20,7 @@ theme_map <- function(...) {
 map_cbsa <- function(ccs_map_data = ccs_map_data,
                      covid_map_data = covid_map_data,
                      show_covid,
-                     caption = "COVID-19 Source: DSHS data reported on 05/06/2020",
+                     caption = "COVID-19 Source: DSHS data reported on {date}",
                      tt = "County: {county}<br>Seats: {est_ccs}<br>COVID Cases: {Cases}<br>COVID Deaths: {Deaths}") {
 
   gg <- ggplot(ccs_map_data, aes(x = long, y = lat)) +
@@ -34,7 +34,10 @@ map_cbsa <- function(ccs_map_data = ccs_map_data,
          y = NULL,
          title = NULL,
          subtitle = "",
-         caption = caption) +
+         caption = glue::glue(caption, date = cases %>%
+                                dplyr::ungroup() %>% 
+                                dplyr::distinct(date) %>% 
+                                dplyr::pull(date))) +
     theme(
       plot.title = element_text(hjust = 0.5, color = "#4e4d47"),
       plot.subtitle = element_text(hjust = 0.5, color = "#4e4d47",
@@ -58,7 +61,8 @@ map_cbsa <- function(ccs_map_data = ccs_map_data,
   if(show_covid) {
     gg <- gg +
       geom_point(data = covid_map_data,
-                 aes(x=long, y=lat, size = `Total # (COVID metrics)`), alpha = .75, color = "#e54e4d")
+                 aes(x=long, y=lat, size = `Total # (COVID metrics)`),
+                 alpha = .75, color = "#e54e4d")
   } else {
     gg <- gg
   }
