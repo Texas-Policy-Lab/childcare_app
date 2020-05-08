@@ -95,14 +95,23 @@ dm.estimates_supply <- function(est, tx_counties) {
   return(est_s)
 }
 
-#' @title Data management cases
-#' @inheritParams dm.workforce_board 
+#' @title Read DSHS
+#' @inheritParams dm.workforce_board
 #' @export
-dm.cases <- function(pth) {
-  cases <- readr::read_csv(here::here(pth)) %>% 
+read_dshs <- function(pth) {
+
+  temp <- tempfile(fileext = ".xlsx")
+  download.file(pth, destfile=temp, mode='wb')
+  df <- readxl::read_excel(temp, sheet = 1, skip = 2)
+  
+  assertthat::assert_that(names(df)[1] == "County\r\nName")  
+  assertthat::assert_that(df$`County\r\nName`[255] == "Total")
+  
+  df <- df %>% 
+    dplyr::rename(county = 1) %>% 
+    dplyr::slice(1:254) %>% 
     dplyr::select(-Population) %>% 
-    dplyr::rename(county = County) %>% 
-    tidyr::gather(variable, `Confirmed cases`, -c(county)) %>% 
+    tidyr::gather(variable, value, -c(county)) %>% 
     dplyr::mutate(variable = gsub("Cases", "", variable),
                   variable = gsub("\n", "", variable),
                   variable = paste0(variable, "-2020"),
@@ -111,25 +120,23 @@ dm.cases <- function(pth) {
     dplyr::arrange(county, desc(date)) %>% 
     dplyr::group_by(county) %>% 
     dplyr::slice(1)
+    
+}
+
+#' @title Data management cases
+#' @inheritParams dm.workforce_board 
+#' @export
+dm.cases <- function(pth) {
+  read_dshs(pth) %>% 
+    dplyr::rename(`Confirmed cases` = value)
 }
 
 #' @title Data management deaths
 #' @inheritParams dm.deaths
 #' @export
 dm.deaths <- function(pth) {
-  deaths <- readr::read_csv(here::here(pth)) %>% 
-    dplyr::select(-Population) %>% 
-    dplyr::rename(county = County) %>% 
-    tidyr::gather(variable, `Deaths`, -c(county)) %>%
-    dplyr::mutate(variable = gsub("Fatalities", "", variable),
-                  variable = gsub("\n", "", variable),
-                  variable = paste0(variable, "-2020"),
-                  date = lubridate::mdy(variable)) %>% 
-    dplyr::select(-variable) %>% 
-    dplyr::arrange(county, desc(date)) %>% 
-    dplyr::group_by(county) %>% 
-    dplyr::slice(1)
-}
+  read_dshs(pth) %>% 
+    dplyr::rename(Deaths = value)}
 
 #' @title Data management covid data
 #' @param cases data.frame.
@@ -140,7 +147,7 @@ dm.covid <- function(cases, deaths, tx_counties) {
     dplyr::left_join(deaths) %>% 
     dplyr::ungroup() %>% 
     tidyr::gather(covid_metric, `Total # (COVID metrics)`, -c(county, date)) %>% 
-    dplyr::mutate(county = gsub("\n", " ", county)) %>% 
+    dplyr::mutate(county = gsub("\r\n", " ", county)) %>% 
     dplyr::select(-date) %>% 
     dplyr::left_join(tx_counties)
   
