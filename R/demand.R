@@ -155,7 +155,7 @@ demand.server <- function(input, output, session) {
     s <- filter.supply_type(df = est_s, input = input)
     d <- filter.demand_type(df = est_d, input = input)
     ccs <- filter.supply_type(df = est_ccs, input = input) 
-    ccs <- filter.demand_type(df = est_ccs, input = input)
+    ccs <- filter.demand_type(df = ccs, input = input)
     c19 <- covid %>%
       tidyr::spread(covid_metric, `Total # (COVID metrics)`)
     
@@ -176,8 +176,10 @@ demand.server <- function(input, output, session) {
                     `Seats per 100 children` = est_ccs) %>% 
       dplyr::mutate(Demand = format(round(Demand, 0), nsmall = 0),
                     Supply = format(round(Supply, 0), nsmall = 0),
-                    `Seats per 100 children` = format(round(`Seats per 100 children`, 0), nsmall = 0)) %>% 
-      dplyr::arrange(desc(`Seats per 100 children`))
+                    `Seats per 100 children` = format(round(`Seats per 100 children`, 0), nsmall = 0)) 
+    
+    # %>% 
+    #   dplyr::arrange(desc(`Seats per 100 children`))
 
 
   })
