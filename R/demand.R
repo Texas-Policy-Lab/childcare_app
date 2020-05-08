@@ -1,17 +1,17 @@
 widget.wfb <- function(wfb) {
-
+  
   all <- sapply(wfb$wfb_name, function(x, wfb) wfb %>% 
                   dplyr::filter(wfb_name == x) %>%
                   dplyr::pull(wfb_id), 
                 simplify = FALSE, 
                 USE.NAMES = TRUE, wfb = wfb)
-  
+
   shinyWidgets::pickerInput(
     inputId = "wfbPicker",
     label = "Workforce Board", 
     choices = all,
-    multiple = TRUE,
-    selected = all,
+    multiple = FALSE,
+    selected = all$All[1],
     options = list(
       `actions-box` = TRUE, 
       size = 10,
@@ -23,14 +23,13 @@ widget.wfb <- function(wfb) {
 
 widget.demand_type <- function(est_ccs) {
 
-  all <- est_ccs %>% 
-    dplyr::distinct(demand) %>% 
-    dplyr::pull(demand)
-  
+  all <- list("Occupation (lower bound)" = "Occupation",
+              "Industry (upper bound)" = "Industry")
+
   shiny::radioButtons("demandRadio",
                       label = NULL,
                       choices = all,
-                      selected = all[1])
+                      selected = all$`Occupation (lower bound)`[1])
 }
 
 widget.supply_type <- function(est_ccs) {
@@ -52,7 +51,7 @@ widget.overlay_covid <- function() {
 }
 
 widget.covid_metric <- function(covid) {
-  
+
   all <- covid %>% 
     dplyr::distinct(covid_metric) %>% 
     dplyr::pull(covid_metric)
@@ -118,6 +117,7 @@ demand.ui <- function(wfb, est_ccs, covid) {
 demand.server <- function(input, output, session) {
 
   ccs_map_data <- shiny::reactive({
+
     df <- filter.supply_type(df = est_ccs, input = input)
     df <- filter.demand_type(df = df, input = input)
 
@@ -126,13 +126,21 @@ demand.server <- function(input, output, session) {
       dplyr::left_join(covid %>%
                          tidyr::spread(covid_metric, `Total # (COVID metrics)`) %>% 
                          dplyr::rename(Cases = `Confirmed cases`))
-    df <- filter.wfb(df = df, input = input)
+
+    if(input$wfbPicker != "0") {
+      df <- filter.wfb(df = df, input = input)  
+    } else {
+      df <- df
+    }
+
   })
-  
+
   covid_map_data <- shiny::reactive({
 
     df <- filter.covid_metric(df = covid, input = input)
-    df <- filter.wfb(df = df, input = input)
+    if(input$wfbPicker != "0") {
+      df <- filter.wfb(df = df, input = input)  
+    }
     df <- df %>% 
           dplyr::left_join(tx_counties %>%
                              dplyr::group_by(county) %>%
@@ -155,33 +163,34 @@ demand.server <- function(input, output, session) {
       dplyr::left_join(d) %>%
       dplyr::left_join(ccs) %>%
       dplyr::left_join(c19)
-    df <- filter.wfb(df = df, input = input)
+
+    if(input$wfbPicker != "0") {
+      df <- filter.wfb(df = df, input = input)  
+    }
+
     df <- df %>%
       dplyr::select(county, est_supply, est_demand, est_ccs, `Confirmed cases`, Deaths) %>%
       dplyr::rename(County = county,
                     Supply = est_supply,
                     Demand = est_demand,
-                    `Seats per 100 children` = est_ccs)
+                    `Seats per 100 children` = est_ccs) %>% 
+      dplyr::mutate(Demand = format(round(Demand, 0), nsmall = 0),
+                    Supply = format(round(Supply, 0), nsmall = 0),
+                    `Seats per 100 children` = format(round(`Seats per 100 children`, 0), nsmall = 0)) %>% 
+      dplyr::arrange(desc(`Seats per 100 children`))
+
   })
 
   pageLength <- shiny::reactive({
     if (length(input$wfbPicker) == 1) {
-      return(nrow(table()))
+      return(10)
     } else {
       return(10)
     }
   })
 
-  paging <- shiny::reactive({
-    if (length(input$wfbPicker) == 1){
-      return(FALSE)
-    } else {
-      return(TRUE)
-    }
-  })
-
   output$demand_map <- ggiraph::renderGirafe({
-    
+
     map_cbsa(ccs_map_data = ccs_map_data(),
              covid_map_data = covid_map_data(),
              show_covid = input$show_covid)
@@ -192,8 +201,9 @@ demand.server <- function(input, output, session) {
     DT::datatable(table(),
                   rownames= FALSE,
                   options = list(searching = FALSE,
-                                 pageLength = pageLength(),
-                                 paging = paging()
+                                 pageLength = 10,
+                                 lengthMenu = list(c(10, 25, 50, 100, -1),
+                                                   c('10', '25', '50', '100', 'All'))
                                 )
                   )
   )
