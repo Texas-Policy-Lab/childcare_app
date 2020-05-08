@@ -5,7 +5,7 @@ dm.workforce_board <- function(pth) {
   pattern <- paste(paste("Workforce Solutions",
                          c("", "of", "for", "for the", "of the")),
                    collapse = "|")
-  
+
   wfb <- readr::read_csv(here::here(pth)) %>% 
     dplyr::rename(wfb_name = workforce_board) %>% 
     dplyr::mutate(wfb_name = stringr::str_replace_all(wfb_name, "[^[:alnum:] ]" , " "),
@@ -14,7 +14,7 @@ dm.workforce_board <- function(pth) {
                   wfb_id = as.numeric(factor(wfb_name, 
                                              levels=unique(wfb_name)))
     )
-  
+
   return(wfb)
 }
 
@@ -100,19 +100,19 @@ dm.estimates_supply <- function(est, tx_counties) {
 #' @export
 read_dshs <- function(pth) {
 
-  temp <- tempfile(fileext = ".xlsx")
-  download.file(pth, destfile=temp, mode='wb')
-  df <- readxl::read_excel(temp, sheet = 1, skip = 2)
+  # temp <- tempfile(fileext = ".xlsx")
+  # download.file(pth, destfile=temp, mode='wb')
+  # df <- readxl::read_excel(temp, sheet = 1, skip = 2)
+  # 
+  # assertthat::assert_that(names(df)[1] == "County\r\nName")  
+  # assertthat::assert_that(df$`County\r\nName`[255] == "Total")
   
-  assertthat::assert_that(names(df)[1] == "County\r\nName")  
-  assertthat::assert_that(df$`County\r\nName`[255] == "Total")
-  
-  df <- df %>% 
+  df <- readr::read_csv(pth) %>% 
     dplyr::rename(county = 1) %>% 
     dplyr::slice(1:254) %>% 
     dplyr::select(-Population) %>% 
     tidyr::gather(variable, value, -c(county)) %>% 
-    dplyr::mutate(variable = gsub("Cases", "", variable),
+    dplyr::mutate(variable = gsub("Cases|Fatalities", "", variable),
                   variable = gsub("\n", "", variable),
                   variable = paste0(variable, "-2020"),
                   date = lubridate::mdy(variable)) %>% 
@@ -147,7 +147,7 @@ dm.covid <- function(cases, deaths, tx_counties) {
     dplyr::left_join(deaths) %>% 
     dplyr::ungroup() %>% 
     tidyr::gather(covid_metric, `Total # (COVID metrics)`, -c(county, date)) %>% 
-    dplyr::mutate(county = gsub("\r\n", " ", county)) %>% 
+    dplyr::mutate(county = gsub("\n", " ", county)) %>% 
     dplyr::select(-date) %>% 
     dplyr::left_join(tx_counties)
   
