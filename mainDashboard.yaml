@@ -22,3 +22,6 @@ data:
   estimates: "./data/Potential_supply_demand_county_5520.csv"
   cases: "./data/covid/confirmed.csv"
   deaths: "./data/covid/deaths.csv"
+dshs:
+  cases: "https://dshs.texas.gov/coronavirus/TexasCOVID19DailyCountyCaseCountData.xlsx"
+  deaths: "https://dshs.texas.gov/coronavirus/TexasCOVID19DailyCountyFatalityCountData.xlsx"
