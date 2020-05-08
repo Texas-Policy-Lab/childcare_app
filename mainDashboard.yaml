@@ -11,7 +11,7 @@ ui:
     tab1: 
       menu_title: "Childcare estimates"
       icon: "child"
-      page_title: "Texas Essential Worker Child Care Supply and Demand"
+      page_title: "Texas Child Care Supply and Demand Estimates"
     tab2:
       menu_title: "Documentation"
       icon: "book"

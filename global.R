@@ -18,8 +18,13 @@ wfb <- dm.workforce_board(pth = config$data$wfb)
 
 tx_counties <- dm.tx_counties(pth = config$data$tx_counties)
 
+row <- data.frame(wfb_id = 0, wfb_name = "All",
+                  stringsAsFactors = FALSE)
+
 wfb <- wfb %>% 
-  dplyr::distinct(wfb_id, wfb_name)
+  dplyr::distinct(wfb_id, wfb_name) %>%  
+  dplyr::bind_rows(row) %>%
+  dplyr::arrange(wfb_id)
 
 assertthat::assert_that(sum(is.na(tx_counties$wfb_id)) == 0)
 assertthat::assert_that(sum(is.na(tx_counties$wfb_name)) == 0)
