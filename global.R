@@ -49,4 +49,3 @@ covid <- dm.covid(cases = cases,
                   tx_counties = tx_counties)
 
 map_tx_counties <- dm.tx_counties_map(tx_counties)
-
