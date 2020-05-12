@@ -50,23 +50,23 @@ covid <- dm.covid(cases = cases,
 
 map_tx_counties <- dm.tx_counties_map(tx_counties)
 
-pop_data <- pop(pth = "./data/Texas Population Data.xlsx") %>%
-  dplyr::select(`County Name`, `Total Population`, `Total Households`,
-                `Number People Under 18`, `Households with one or more under 18`) %>% 
-  dplyr::rename(n_pop = `Total Population`,
-                n_hhld = `Total Households`,
-                n_kid_under18 = `Number People Under 18`,
-                n_hhld_multiple_kid_under18 = `Households with one or more under 18`) %>% 
-  dplyr::mutate(n_kid_under12 = (n_kid_under18/18)*13,
-                n_ppl_hhld = n_pop/n_hhld,
-                pct_kid_under12 = (n_kid_under12/n_pop)*100,
-                n_kid_under12_per_100hhld = (n_kid_under12/n_hhld)*100
-                )
-
-occ_data <- occupations(pth = "./data/occupations.xlsx") %>% 
-  dplyr::left_join(pop_data) %>% 
-  dplyr::mutate(n_frontline_hhld = phase1/n_ppl_hhld)
-
-occ_data %>% dplyr::filter(`County Name` == "Harris County, Texas") %>% as.data.frame()
-
-ind_data <- industry(pth = "./data/occupations.xlsx")
+# pop_data <- pop(pth = "./data/Texas Population Data.xlsx") %>%
+#   dplyr::select(`County Name`, `Total Population`, `Total Households`,
+#                 `Number People Under 18`, `Households with one or more under 18`) %>% 
+#   dplyr::rename(n_pop = `Total Population`,
+#                 n_hhld = `Total Households`,
+#                 n_kid_under18 = `Number People Under 18`,
+#                 n_hhld_multiple_kid_under18 = `Households with one or more under 18`) %>% 
+#   dplyr::mutate(n_kid_under12 = (n_kid_under18/18)*13,
+#                 n_ppl_hhld = n_pop/n_hhld,
+#                 pct_kid_under12 = (n_kid_under12/n_pop)*100,
+#                 n_kid_under12_per_100hhld = (n_kid_under12/n_hhld)*100
+#                 )
+# 
+# occ_data <- occupations(pth = "./data/occupations.xlsx") %>% 
+#   dplyr::left_join(pop_data) %>% 
+#   dplyr::mutate(n_frontline_hhld = phase1/n_ppl_hhld)
+# 
+# occ_data %>% dplyr::filter(`County Name` == "Harris County, Texas") %>% as.data.frame()
+# 
+# ind_data <- industry(pth = "./data/occupations.xlsx")
