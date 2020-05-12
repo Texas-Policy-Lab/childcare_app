@@ -178,3 +178,103 @@ dm.tx_counties_map <- function(tx_counties) {
 
   return(tx_counties)  
 }
+
+demand_dm <- function(df, essential_id, phase1_id) {
+  
+  df <- df %>% 
+    dplyr::select(Geography, ind_occ_id, ind_occ, Year, workforce) %>%
+    dplyr::filter(ind_occ_id %in% c(essential_id, phase1_id)) %>%
+    dplyr::arrange(desc(Year)) %>%
+    dplyr::group_by(Geography, ind_occ_id) %>%
+    dplyr::slice(1) %>% 
+    dplyr::ungroup()
+  
+  assertthat::assert_that(all(df$Year %in% c(2017, 2018)))
+  
+  y <- df %>% 
+    dplyr::distinct(Geography, Year) %>%
+    dplyr::group_by(Geography, Year) %>%
+    dplyr::summarise(n = dplyr::n())
+  
+  cnty18 <- df %>% 
+    dplyr::filter(Year == 2018) %>% 
+    dplyr::distinct(Geography) %>% 
+    dplyr::pull(Geography)
+  
+  cnty17 <- df %>% 
+    dplyr::filter(Year == 2017) %>% 
+    dplyr::distinct(Geography) %>% 
+    dplyr::pull(Geography)
+  
+  df <- df %>% 
+    dplyr::mutate(essential = dplyr::if_else(ind_occ_id %in% essential_id, 1, 0),
+                  phase1 = dplyr::if_else(ind_occ_id %in% c(essential_id, phase1_id), 1, 0),
+                  workforce = ifelse(ind_occ_id %in% phase1_id, .7*workforce, workforce)) %>% 
+    tidyr::gather(variable, value, -c(Geography, ind_occ_id, ind_occ, Year, workforce))
+  
+  assertthat::assert_that(all(df  %>% dplyr::filter(variable == "phase1")  %>% dplyr::select(value) == 1))
+  
+  df <- df %>% 
+    dplyr::filter(value == 1) %>% 
+    dplyr::select(-c(value))
+  
+  x <- df %>%
+    dplyr::group_by(variable) %>%
+    dplyr::summarise(n = sum(workforce, na.rm = T))
+  
+  assertthat::assert_that(x %>%
+                            dplyr::filter(variable == "essential") %>%
+                            dplyr::select(n) %>%
+                            dplyr::pull(n) <
+                            x %>%
+                            dplyr::filter(variable == "phase1") %>%
+                            dplyr::select(n) %>%
+                            dplyr::pull(n))
+  
+  df <- df %>% 
+    dplyr::group_by(Geography, variable) %>%
+    dplyr::summarise(workforce = sum(workforce)) %>%
+    tidyr::spread(variable, workforce) %>% 
+    dplyr::mutate(`County Name` = gsub("TX", "Texas", Geography))
+  
+  assertthat::assert_that(nrow(df) == 254)  
+  
+  return(df)
+}
+
+occupations <- function(pth,
+                        essential_id = c(23, 21, 19, 7, 13, 12, 9, 16, 10, 15, 11),
+                        phase1_id = c(14, 17, 8)
+                        ) {
+
+  df <- readxl::read_excel(pth, sheet = 2) %>%
+    dplyr::rename(ind_occ_id = `ID Occupation`,
+                  ind_occ = Occupation,
+                  workforce = `Workforce by Occupation and Gender`)
+                  
+  df <- demand_dm(df = df,
+                  essential_id = essential_id,
+                  phase1_id = phase1_id)
+  return(df)
+}
+
+industry <- function(pth,
+                     essential_id = c(14, 19, 18, 1, 2, 3, 15, 4, 0, 13, 6, 12, 7, 11, 8, 10, 9),
+                     phase1_id = c(17, 16, 5)) {
+
+  df <- readxl::read_excel(pth, sheet = 5) %>% 
+    dplyr::rename(ind_occ_id = `ID Industry`,
+                  ind_occ = Industry,
+                  workforce = `Workforce by Industry and Gender`)
+
+  df <- demand_dm(df = df,
+                  essential_id = essential_id,
+                  phase1_id = phase1_id)
+  return(df)
+  
+}
+
+pop <- function(pth) {
+  
+  df <- readxl::read_xlsx(pth, sheet = 1)
+}
