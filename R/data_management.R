@@ -147,7 +147,7 @@ dm.covid <- function(cases, deaths, tx_counties) {
     dplyr::left_join(deaths) %>% 
     dplyr::ungroup() %>% 
     tidyr::gather(covid_metric, `Total # (COVID metrics)`, -c(county, date)) %>% 
-    dplyr::mutate(county = gsub("\n", " ", county)) %>% 
+    dplyr::mutate(county = gsub("\r\n", " ", county)) %>% 
     dplyr::select(-date) %>% 
     dplyr::left_join(tx_counties)
   
