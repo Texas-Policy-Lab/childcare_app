@@ -20,8 +20,8 @@ theme_map <- function(...) {
 map_cbsa <- function(ccs_map_data = ccs_map_data,
                      covid_map_data = covid_map_data,
                      show_covid,
-                     caption = "COVID-19 Source: DSHS data reported on 05/06/2020",
-                     tt = "County: {county}<br>Seats: {est_ccs}<br>COVID Cases: {Cases}<br>COVID Deaths: {Deaths}") {
+                     caption = "COVID-19 Source: DSHS data reported on {date}",
+                     tt = "County: {county}<br>Seats per 100: {est_ccs}<br>COVID Cases: {Cases}<br>COVID Deaths: {Deaths}") {
 
   gg <- ggplot(ccs_map_data, aes(x = long, y = lat)) +
     ggiraph::geom_polygon_interactive(aes(group = subregion, fill = label, 
@@ -34,7 +34,10 @@ map_cbsa <- function(ccs_map_data = ccs_map_data,
          y = NULL,
          title = NULL,
          subtitle = "",
-         caption = caption) +
+         caption = glue::glue(caption, date = cases %>%
+                                dplyr::ungroup() %>% 
+                                dplyr::distinct(date) %>% 
+                                dplyr::pull(date))) +
     theme(
       plot.title = element_text(hjust = 0.5, color = "#4e4d47"),
       plot.subtitle = element_text(hjust = 0.5, color = "#4e4d47",
@@ -46,19 +49,22 @@ map_cbsa <- function(ccs_map_data = ccs_map_data,
       plot.margin = unit(c(.5,.5,.2,.5), "cm"),
       panel.spacing = unit(c(-.1,0.2,.2,0.2), "cm"),
       panel.border = element_blank(),
-      plot.caption = element_text(size = 6,
+      plot.caption = element_text(size = 10,
                                   hjust = 0.92,
                                   margin = margin(t = 0.2,
                                                   b = 0,
                                                   unit = "cm"),
-                                  color = "#939184")
+                                  color = "#939184"),
+      legend.title=element_text(size=12), 
+      legend.text=element_text(size=11)
     ) +
     scale_fill_manual(stringr::str_wrap("Child care seats per 100 children", 16), values=c("#ee9391", "#b199bf", "#5c67b1"), na.value = "grey")
 
   if(show_covid) {
     gg <- gg +
       geom_point(data = covid_map_data,
-                 aes(x=long, y=lat, size = `Total # (COVID metrics)`), alpha = .75, color = "#e54e4d")
+                 aes(x=long, y=lat, size = `Total # (COVID metrics)`),
+                 alpha = .75, color = "#e54e4d")
   } else {
     gg <- gg
   }
