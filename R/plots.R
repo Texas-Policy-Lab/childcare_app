@@ -54,10 +54,11 @@ map_cbsa <- function(ccs_map_data = ccs_map_data,
                                   margin = margin(t = 0.2,
                                                   b = 0,
                                                   unit = "cm"),
-                                  color = "#939184"
+                                  color = "#939184",
+                                  family="Arial"
                                   ),
-      legend.title=element_text(size=12), 
-      legend.text=element_text(size=11)
+      legend.title=element_text(size=12, family="Arial"), 
+      legend.text=element_text(size=11, family="Arial")
     ) +
     scale_fill_manual(stringr::str_wrap("Child care seats per 100 children", 16), values=c("#ee9391", "#b199bf", "#5c67b1"), na.value = "grey")
 
