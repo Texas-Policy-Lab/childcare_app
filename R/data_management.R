@@ -100,14 +100,16 @@ dm.estimates_supply <- function(est, tx_counties) {
 #' @export
 read_dshs <- function(pth) {
 
-  # temp <- tempfile(fileext = ".xlsx")
-  # download.file(pth, destfile=temp, mode='wb')
-  # df <- readxl::read_excel(temp, sheet = 1, skip = 2)
-  # 
-  # assertthat::assert_that(names(df)[1] == "County\r\nName")  
-  # assertthat::assert_that(df$`County\r\nName`[255] == "Total")
+  httr::GET(pth, httr::write_disk(temp <- tempfile(fileext = ".xlsx")))
   
-  df <- readr::read_csv(pth) %>% 
+  if (file.exists(temp)) {
+    df <- readxl::read_excel(temp, sheet = 1, skip = 2)
+  }
+
+  assertthat::assert_that(names(df)[1] == "County\r\nName")
+  assertthat::assert_that(df$`County\r\nName`[255] == "Total")
+  
+  df <- df %>% 
     dplyr::rename(county = 1) %>% 
     dplyr::slice(1:254) %>% 
     dplyr::select(-Population) %>% 
@@ -115,12 +117,12 @@ read_dshs <- function(pth) {
     dplyr::mutate(variable = gsub("Cases|Fatalities", "", variable),
                   variable = gsub("\n", "", variable),
                   variable = paste0(variable, "-2020"),
-                  date = lubridate::mdy(variable)) %>% 
+                  date = lubridate::mdy(variable),
+                  county = gsub("\r\n", " ", county)) %>% 
     dplyr::select(-variable) %>% 
     dplyr::arrange(county, desc(date)) %>% 
     dplyr::group_by(county) %>% 
     dplyr::slice(1)
-
 }
 
 #' @title Data management cases

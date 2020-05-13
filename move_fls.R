@@ -1,15 +1,15 @@
-my_modules <- list.files("~/childcare-supply-demand",
+my_modules <- list.files("~/childcare_app",
                          recursive = TRUE)
 lapply(my_modules, function(filename) {
 
-  from <- file.path("~/childcare-supply-demand", filename)
+  from <- file.path("~/childcare_app", filename)
 
   assertthat::assert_that(file.exists(from))
   assertthat::assert_that(dir.exists("/srv/shiny-server/"))
-  assertthat::assert_that(dir.exists("/srv/shiny-server/childcare-supply-demand"))
+  assertthat::assert_that(dir.exists("/srv/shiny-server/childcare-supply-demand-staging"))
 
-  to <- file.path("/srv/shiny-server/childcare-supply-demand",
-                 filename)
+  to <- file.path("/srv/shiny-server/childcare-supply-demand-staging",
+                  filename)
 
   file.copy(from = from,
             to = to, 

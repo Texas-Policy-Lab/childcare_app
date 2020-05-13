@@ -10,6 +10,8 @@ library(mapproj)
 rm(list = ls())
 options(encoding = "UTF-8")
 
+httr::set_config(httr::config(ssl_verifypeer = 0L))
+
 sapply(list.files("R", full.names = TRUE, recursive = TRUE), source, .GlobalEnv)
 
 config <- yaml::read_yaml("./mainDashboard.yaml")
@@ -40,9 +42,9 @@ est_d <- dm.estimates_demand(est = est,
 est_s <- dm.estimates_supply(est = est,
                              tx_counties = tx_counties)
 
-cases <- dm.cases(pth = config$data$cases)
+cases <- dm.cases(pth = config$dshs$cases)
 
-deaths <- dm.deaths(pth = config$data$deaths)
+deaths <- dm.deaths(pth = config$dshs$deaths)
 
 covid <- dm.covid(cases = cases,
                   deaths = deaths,
