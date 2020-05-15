@@ -168,17 +168,19 @@ demand.server <- function(input, output, session) {
       df <- filter.wfb(df = df, input = input)  
     }
 
+    # browser()
+    
     df <- df %>%
       dplyr::select(county, est_supply, est_demand, est_ccs, `Confirmed cases`, Deaths) %>%
       dplyr::rename(County = county,
                     Supply = est_supply,
                     Demand = est_demand,
                     `Seats per 100 children` = est_ccs) %>% 
-      dplyr::mutate(Demand = format(round(Demand, 0), nsmall = 0),
-                    Supply = format(round(Supply, 0), nsmall = 0),
-                    `Seats per 100 children` = format(round(`Seats per 100 children`, 0), nsmall = 0),
-                    `Confirmed cases` = format(`Confirmed cases`, nsmall = 0),
-                    Deaths = format(Deaths, nsmall = 0))
+      dplyr::mutate(Demand = as.numeric(format(round(Demand, 0), nsmall = 0)),
+                    Supply = as.numeric(format(round(Supply, 0), nsmall = 0)),
+                    `Seats per 100 children` = as.numeric(format(round(`Seats per 100 children`, 0), nsmall = 0)),
+                    `Confirmed cases` = as.numeric(`Confirmed cases`),
+                    Deaths = as.numeric(Deaths))
   })
 
   pageLength <- shiny::reactive({
