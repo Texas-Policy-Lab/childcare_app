@@ -98,7 +98,7 @@ dm.estimates_supply <- function(est, tx_counties) {
 #' @title Read DSHS
 #' @inheritParams dm.workforce_board
 #' @export
-read_dshs <- function(pth) {
+read_dshs <- function(pth, tx_counties) {
 
   httr::GET(pth, httr::write_disk(temp <- tempfile(fileext = ".xlsx")))
   
@@ -107,18 +107,19 @@ read_dshs <- function(pth) {
   }
 
   assertthat::assert_that(names(df)[1] == "County\r\nName")
-  assertthat::assert_that(df$`County\r\nName`[255] == "Total")
   
   df <- df %>% 
     dplyr::rename(county = 1) %>% 
-    dplyr::slice(1:254) %>% 
+    dplyr::right_join(tx_counties %>% 
+                       dplyr::select(county)) %>% 
     dplyr::select(-Population) %>% 
     tidyr::gather(variable, value, -c(county)) %>% 
     dplyr::mutate(variable = gsub("Cases|Fatalities", "", variable),
-                  variable = gsub("\n", "", variable),
+                  variable = stringr::str_replace_all(variable, "[\r\n]" , ""),
                   variable = paste0(variable, "-2020"),
                   date = lubridate::mdy(variable),
-                  county = gsub("\r\n", " ", county)) %>% 
+                  county = gsub("\r\n", " ", county),
+                  value = as.numeric(value)) %>% 
     dplyr::select(-variable) %>% 
     dplyr::arrange(county, desc(date)) %>% 
     dplyr::group_by(county) %>% 
@@ -128,16 +129,16 @@ read_dshs <- function(pth) {
 #' @title Data management cases
 #' @inheritParams dm.workforce_board 
 #' @export
-dm.cases <- function(pth) {
-  read_dshs(pth) %>% 
+dm.cases <- function(pth, tx_counties) {
+  read_dshs(pth, tx_counties) %>% 
     dplyr::rename(`Confirmed cases` = value)
 }
 
 #' @title Data management deaths
 #' @inheritParams dm.deaths
 #' @export
-dm.deaths <- function(pth) {
-  read_dshs(pth) %>% 
+dm.deaths <- function(pth, tx_counties) {
+  read_dshs(pth, tx_counties) %>% 
     dplyr::rename(Deaths = value)}
 
 #' @title Data management covid data
@@ -145,6 +146,7 @@ dm.deaths <- function(pth) {
 #' @param deaths data.frame.
 #' @inheritParams dm.estimates_ccs
 dm.covid <- function(cases, deaths, tx_counties) {
+
   covid <- cases %>% 
     dplyr::left_join(deaths) %>% 
     dplyr::ungroup() %>% 
