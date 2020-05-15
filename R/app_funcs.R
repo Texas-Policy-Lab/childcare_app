@@ -168,8 +168,6 @@ demand.server <- function(input, output, session) {
       df <- filter.wfb(df = df, input = input)  
     }
 
-    # browser()
-    
     df <- df %>%
       dplyr::select(county, est_supply, est_demand, est_ccs, `Confirmed cases`, Deaths) %>%
       dplyr::rename(County = county,
