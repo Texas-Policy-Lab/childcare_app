@@ -180,7 +180,11 @@ dm.tx_counties_map <- function(tx_counties) {
   return(tx_counties)  
 }
 
-demand_dm <- function(df, essential_id, phase1_id) {
+#' @title Data management for demand data
+#' @param essential_id vector. Vector of numeric ids indicating industries/occupations deemed essential in Texas.
+#' @param phase1_id vector. Vector of numeric ides indicating industries/occupations deemed essential in Texas.
+#' @export
+dm.demand <- function(df, essential_id, phase1_id) {
   
   df <- df %>% 
     dplyr::select(Geography, ind_occ_id, ind_occ, Year, workforce) %>%
@@ -192,28 +196,13 @@ demand_dm <- function(df, essential_id, phase1_id) {
   
   assertthat::assert_that(all(df$Year %in% c(2017, 2018)))
   
-  y <- df %>% 
-    dplyr::distinct(Geography, Year) %>%
-    dplyr::group_by(Geography, Year) %>%
-    dplyr::summarise(n = dplyr::n())
-  
-  cnty18 <- df %>% 
-    dplyr::filter(Year == 2018) %>% 
-    dplyr::distinct(Geography) %>% 
-    dplyr::pull(Geography)
-  
-  cnty17 <- df %>% 
-    dplyr::filter(Year == 2017) %>% 
-    dplyr::distinct(Geography) %>% 
-    dplyr::pull(Geography)
-  
   df <- df %>% 
     dplyr::mutate(essential = dplyr::if_else(ind_occ_id %in% essential_id, 1, 0),
                   phase1 = dplyr::if_else(ind_occ_id %in% c(essential_id, phase1_id), 1, 0),
                   workforce = ifelse(ind_occ_id %in% phase1_id, .7*workforce, workforce)) %>% 
     tidyr::gather(variable, value, -c(Geography, ind_occ_id, ind_occ, Year, workforce))
   
-  assertthat::assert_that(all(df  %>% dplyr::filter(variable == "phase1")  %>% dplyr::select(value) == 1))
+  assertthat::assert_that(all(df%>% dplyr::filter(variable == "phase1")  %>% dplyr::select(value) == 1))
   
   df <- df %>% 
     dplyr::filter(value == 1) %>% 
@@ -243,7 +232,11 @@ demand_dm <- function(df, essential_id, phase1_id) {
   return(df)
 }
 
-occupations <- function(pth,
+#' @title Data management for occupation data
+#' @inheritParams dm.workforce_board
+#' @inheritParams dm.demand
+#' @export
+dm.occupations <- function(pth,
                         essential_id = c(23, 21, 19, 7, 13, 12, 9, 16, 10, 15, 11),
                         phase1_id = c(14, 17, 8)
                         ) {
@@ -253,29 +246,47 @@ occupations <- function(pth,
                   ind_occ = Occupation,
                   workforce = `Workforce by Occupation and Gender`)
                   
-  df <- demand_dm(df = df,
+  df <- dm.demand(df = df,
                   essential_id = essential_id,
                   phase1_id = phase1_id)
   return(df)
 }
 
-industry <- function(pth,
-                     essential_id = c(14, 19, 18, 1, 2, 3, 15, 4, 0, 13, 6, 12, 7, 11, 8, 10, 9),
-                     phase1_id = c(17, 16, 5)) {
+#' @title Data management for industry data
+#' @inheritParams dm.workforce_board
+#' @inheritParams dm.demand
+#' @export
+dm.industry <- function(pth,
+                        essential_id = c(14, 19, 18, 1, 2, 3, 15, 4, 0, 13, 6, 12, 7, 11, 8, 10, 9),
+                        phase1_id = c(17, 16, 5)) {
 
   df <- readxl::read_excel(pth, sheet = 5) %>% 
     dplyr::rename(ind_occ_id = `ID Industry`,
                   ind_occ = Industry,
                   workforce = `Workforce by Industry and Gender`)
 
-  df <- demand_dm(df = df,
+  df <- dm.demand(df = df,
                   essential_id = essential_id,
                   phase1_id = phase1_id)
   return(df)
   
 }
 
-pop <- function(pth) {
+#' @title Data management for population data
+#' @inheritParams dm.workforce_board
+#' @export
+dm.pop <- function(pth) {
   
-  df <- readxl::read_xlsx(pth, sheet = 1)
+  df <- readxl::read_xlsx(pth, sheet = 1) %>% 
+    dplyr::select(`County Name`, `Total Population`, `Total Households`,
+                `Number People Under 18`, `Households with one or more under 18`) %>%
+    dplyr::rename(n_pop = `Total Population`,
+                  n_hhld = `Total Households`,
+                  n_kid_under18 = `Number People Under 18`,
+                  n_hhld_multiple_kid_under18 = `Households with one or more under 18`) %>%
+    dplyr::mutate(n_kid_under12 = (n_kid_under18/18)*13,
+                  n_ppl_hhld = n_pop/n_hhld,
+                  pct_kid_under12 = (n_kid_under12/n_pop)*100,
+                  n_kid_under12_per_100hhld = (n_kid_under12/n_hhld)*100
+    )
 }
