@@ -42,9 +42,11 @@ est_d <- dm.estimates_demand(est = est,
 est_s <- dm.estimates_supply(est = est,
                              tx_counties = tx_counties)
 
-cases <- dm.cases(pth = config$dshs$cases)
+cases <- dm.cases(pth = config$dshs$cases,
+                  tx_counties = tx_counties)
 
-deaths <- dm.deaths(pth = config$dshs$deaths)
+deaths <- dm.deaths(pth = config$dshs$deaths,
+                    tx_counties = tx_counties)
 
 covid <- dm.covid(cases = cases,
                   deaths = deaths,
