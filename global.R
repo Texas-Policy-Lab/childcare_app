@@ -10,6 +10,8 @@ library(mapproj)
 rm(list = ls())
 options(encoding = "UTF-8")
 
+httr::set_config(httr::config(ssl_verifypeer = 0L))
+
 sapply(list.files("R", full.names = TRUE, recursive = TRUE), source, .GlobalEnv)
 
 config <- yaml::read_yaml("./mainDashboard.yaml")

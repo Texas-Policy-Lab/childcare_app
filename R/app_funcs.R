@@ -158,7 +158,7 @@ demand.server <- function(input, output, session) {
     ccs <- filter.demand_type(df = ccs, input = input)
     c19 <- covid %>%
       tidyr::spread(covid_metric, `Total # (COVID metrics)`)
-    
+  
     df <- s %>%
       dplyr::left_join(d) %>%
       dplyr::left_join(ccs) %>%
@@ -176,12 +176,9 @@ demand.server <- function(input, output, session) {
                     `Seats per 100 children` = est_ccs) %>% 
       dplyr::mutate(Demand = format(round(Demand, 0), nsmall = 0),
                     Supply = format(round(Supply, 0), nsmall = 0),
-                    `Seats per 100 children` = format(round(`Seats per 100 children`, 0), nsmall = 0)) 
-    
-    # %>% 
-    #   dplyr::arrange(desc(`Seats per 100 children`))
-
-
+                    `Seats per 100 children` = format(round(`Seats per 100 children`, 0), nsmall = 0),
+                    `Confirmed cases` = format(`Confirmed cases`, nsmall = 0),
+                    Deaths = format(Deaths, nsmall = 0))
   })
 
   pageLength <- shiny::reactive({
@@ -200,13 +197,15 @@ demand.server <- function(input, output, session) {
   })
 
   output$estimate_table <- DT::renderDataTable(
-
+  
     DT::datatable(table(),
                   rownames= FALSE,
                   options = list(searching = FALSE,
                                  pageLength = 10,
                                  lengthMenu = list(c(10, 25, 50, 100, -1),
-                                                   c('10', '25', '50', '100', 'All'))
+                                                   c('10', '25', '50', '100', 'All')),
+                                 autoWidth = TRUE,
+                                 columnDefs = list(list(width = '75px', targets = "_all"))
                                 )
                   )
   )

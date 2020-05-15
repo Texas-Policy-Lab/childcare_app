@@ -100,9 +100,11 @@ dm.estimates_supply <- function(est, tx_counties) {
 #' @export
 read_dshs <- function(pth) {
 
-  temp <- tempfile(fileext = ".xlsx")
-  download.file(pth, destfile=temp, mode='wb')
-  df <- readxl::read_excel(temp, sheet = 1, skip = 2)
+  httr::GET(pth, httr::write_disk(temp <- tempfile(fileext = ".xlsx")))
+  
+  if (file.exists(temp)) {
+    df <- readxl::read_excel(temp, sheet = 1, skip = 2)
+  }
 
   assertthat::assert_that(names(df)[1] == "County\r\nName")
   assertthat::assert_that(df$`County\r\nName`[255] == "Total")
@@ -121,7 +123,6 @@ read_dshs <- function(pth) {
     dplyr::arrange(county, desc(date)) %>% 
     dplyr::group_by(county) %>% 
     dplyr::slice(1)
-
 }
 
 #' @title Data management cases
@@ -148,7 +149,7 @@ dm.covid <- function(cases, deaths, tx_counties) {
     dplyr::left_join(deaths) %>% 
     dplyr::ungroup() %>% 
     tidyr::gather(covid_metric, `Total # (COVID metrics)`, -c(county, date)) %>% 
-    dplyr::mutate(county = gsub("\r\n", " ", county)) %>% 
+    dplyr::mutate(county = gsub("\n", " ", county)) %>% 
     dplyr::select(-date) %>% 
     dplyr::left_join(tx_counties)
   

@@ -1,13 +1,44 @@
-# childcare_app
+# Childcare supply and demand application
 
-Childcare supply and demand application
+Childcare supply and demand application during COVID-19. 
 
-## Data
+## Data Sources
 
-### Childcare data
+* COVID-19 data are from DSHS
+* Demand data are from the American Community Survey 5-year estimates
 
-The childcare demand data by CBSA were collected from Yale's Childcare COVID-19 Response [map](https://covid.yale.edu/innovation/mapping/childcare/). The associated paper and [analysis](https://github.com/jbayham/us_childcare_obligations) indicated the data were collected from [CPS-IPUMS](https://cps.ipums.org/cps/). The CPS_IPUMS data contain a variable called metfips which is the geographical statistical area. The [documentation](https://cps.ipums.org/cps/codes/metfips_2014onward_codes.shtml) for the metfips variable uses CBSA data from February 2013.
+## Run app locally
 
-### CBSA 
+1. In the Console run `shiny::runApp()` to run the application locally.
 
-CBSA data are from the [Census Bureau](https://www.census.gov/geographies/reference-files/time-series/demo/metro-micro/delineation-files.html). This project utilizes the CBSA data from February 2013 which can be downloaded [here](https://www2.census.gov/programs-surveys/metro-micro/geographies/reference-files/2013/delineation-files/list1.xls). Data is used from 2013 because the CPS_IPUMS variable metfips uses geographical coding from Febrary 2013.
+## Update app
+
+To deploy the app to the linux server after changes have been made.
+
+1. Log onto the [linux server](http://10.128.93.29:8787/)
+2. Pull changes from github `git pull origin master`
+3. Update configuration file to indicate whether to deploy application to development or to the production.
+  - To deploy to development the configuration file should look like
+
+```
+deploy:
+  prod:
+    url: "childcare-supply-demand"
+    run: FALSE
+  dev:
+    url: "childcare-supply-demand-staging"
+    run: TRUE
+```
+  - to deploy to production the configuration file should look like
+
+```
+deploy:
+  prod:
+    url: "childcare-supply-demand"
+    run: TRUE
+  dev:
+    url: "childcare-supply-demand-staging"
+    run: FALSE
+```
+
+4. In the Console run `./deploy_app.R`
