@@ -177,8 +177,8 @@ demand.server <- function(input, output, session) {
       dplyr::mutate(Demand = format(round(Demand, 0), nsmall = 0),
                     Supply = format(round(Supply, 0), nsmall = 0),
                     `Seats per 100 children` = format(round(`Seats per 100 children`, 0), nsmall = 0),
-                    `Confirmed cases` = format(round(`Confirmed cases`, 0), nsmall = 0),
-                    Deaths = format(round(Deaths, 0), nsmall = 0))
+                    `Confirmed cases` = format(`Confirmed cases`, nsmall = 0),
+                    Deaths = format(Deaths, nsmall = 0))
   })
 
   pageLength <- shiny::reactive({
@@ -197,7 +197,7 @@ demand.server <- function(input, output, session) {
   })
 
   output$estimate_table <- DT::renderDataTable(
-
+  
     DT::datatable(table(),
                   rownames= FALSE,
                   options = list(searching = FALSE,
