@@ -226,7 +226,8 @@ dm.demand <- function(df, essential_id, phase1_id) {
     dplyr::group_by(Geography, variable) %>%
     dplyr::summarise(workforce = sum(workforce)) %>%
     tidyr::spread(variable, workforce) %>% 
-    dplyr::mutate(`County Name` = gsub("TX", "Texas", Geography))
+    dplyr::mutate(`County Name` = gsub("TX", "Texas", Geography)) %>%
+    dplyr::ungroup()
   
   assertthat::assert_that(nrow(df) == 254)  
   
@@ -246,11 +247,33 @@ dm.occupations <- function(pth,
     dplyr::rename(ind_occ_id = `ID Occupation`,
                   ind_occ = Occupation,
                   workforce = `Workforce by Occupation and Gender`)
+  
                   
   df <- dm.demand(df = df,
                   essential_id = essential_id,
                   phase1_id = phase1_id)
+
+  df <- dm.childdemand(df)
+
   return(df)
+}
+
+
+#' @title Data management for occupation child demand data
+#' @inheritParams 
+#' @inheritParams dm.occupations 
+#' @export
+
+dm.childdemand <- function(df) {
+
+  df <- df %>%
+    dplyr:: left_join(pop_data) %>%
+    dplyr:: mutate(n_hhld_w_ess = phase1/n_ppl_hhld, 
+                   n_kid_needcare = .75*(n_kid_under12_per_100hhld*n_hhld_w_ess)/100) %>%
+    dplyr:: select(`County Name`, n_kid_needcare)
+  
+  return(df)
+  
 }
 
 #' @title Data management for industry data
@@ -261,6 +284,7 @@ dm.industry <- function(pth,
                         essential_id = c(14, 19, 18, 1, 2, 3, 15, 4, 0, 13, 6, 12, 7, 11, 8, 10, 9),
                         phase1_id = c(17, 16, 5)) {
 
+  
   df <- readxl::read_excel(pth, sheet = 5) %>% 
     dplyr::rename(ind_occ_id = `ID Industry`,
                   ind_occ = Industry,
@@ -269,9 +293,13 @@ dm.industry <- function(pth,
   df <- dm.demand(df = df,
                   essential_id = essential_id,
                   phase1_id = phase1_id)
+
+  df <- dm.childdemand(df)
+  
   return(df)
   
 }
+
 
 #' @title Data management for population data
 #' @inheritParams dm.workforce_board
@@ -290,4 +318,72 @@ dm.pop <- function(pth) {
                   pct_kid_under12 = (n_kid_under12/n_pop)*100,
                   n_kid_under12_per_100hhld = (n_kid_under12/n_hhld)*100
     )
+}
+
+#' @title Data management for occupation breakdowns
+#' @inheritParams 
+#' export
+
+dm.occ_breakdown <- function(pth, phase1_id = c(8,14,17)) {
+  
+  df <- readxl::read_xlsx(pth, sheet=2) %>%
+    dplyr::rename(ind_occ_id = `ID Occupation`,
+                  ind_occ = Occupation,
+                  workforce = `Workforce by Occupation and Gender`) %>%
+    dplyr::mutate(`County Name` = gsub("TX", "Texas", Geography))
+  
+  df <- df %>% 
+    dplyr::select(`County Name`, ind_occ_id, ind_occ, Year, workforce) %>%
+    dplyr::arrange(desc(Year)) %>%
+    dplyr::group_by(`County Name`, ind_occ_id) %>%
+    dplyr::slice(1) %>% 
+    dplyr::ungroup()
+  
+  assertthat::assert_that(all(df$Year %in% c(2017, 2018)))
+  
+  df <- df %>%
+    dplyr:: mutate(workforce = ifelse(ind_occ_id %in% phase1_id, .7*workforce, workforce))
+
+  
+  df <- df %>%
+    dplyr::left_join(pop_data) %>%
+    dplyr::mutate(n_hhld_w_ess = phase1/n_ppl_hhld, n_kids_needcare = .75*n_kid_under12_per_100hhld*n_hhld_w_ess*(1/100))
+  
+  df <- df %>%
+    group_by(`County Name`, ind_occ) %>%
+    summarise(workers = sum(workforce))
+  
+  return(df)
+}
+
+#' @title Data management for industry breakdowns
+#' @inheritParams 
+#' export
+dm.ind_breakdown <- function(pth, phase1_id = c(17, 16, 5)) {
+  
+  df <- readxl::read_xlsx(pth, sheet=5) %>%
+    dplyr::rename(ind_occ_id = `ID Industry`,
+                  ind_occ = Industry,
+                  workforce = `Workforce by Industry and Gender`)
+  
+  df <- df %>% 
+    dplyr::select(Geography, ind_occ_id, ind_occ, Year, workforce) %>%
+    dplyr::arrange(desc(Year)) %>%
+    dplyr::group_by(Geography, ind_occ_id) %>%
+    dplyr::slice(1) %>% 
+    dplyr::ungroup()
+  
+  assertthat::assert_that(all(df$Year %in% c(2017, 2018)))
+  
+  df <- df %>%
+    dplyr:: mutate(workforce = ifelse(ind_occ_id %in% phase1_id, .7*workforce, workforce))
+  
+  df <- df %>%
+    group_by(Geography, ind_occ) %>%
+    summarise(workers = sum(workforce))
+  
+  df <- df %>%
+    dplyr::mutate(n_hhld_w_ess = phase1/n_ppl_hhld, n_kids_needcare = .75*n_kid_under12_per_100hhld*n_hhld_w_ess*(1/100))
+  
+  return(df)
 }
