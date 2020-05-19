@@ -237,10 +237,12 @@ dm.demand <- function(df, essential_id, phase1_id) {
 #' @title Data management for occupation data
 #' @inheritParams dm.workforce_board
 #' @inheritParams dm.demand
+#' @inheritParams dm.childdemand
 #' @export
 dm.occupations <- function(pth,
                         essential_id = c(23, 21, 19, 7, 13, 12, 9, 16, 10, 15, 11),
-                        phase1_id = c(14, 17, 8)
+                        phase1_id = c(14, 17, 8),
+                        pop_data
                         ) {
 
   df <- readxl::read_excel(pth, sheet = 2) %>%
@@ -253,18 +255,18 @@ dm.occupations <- function(pth,
                   essential_id = essential_id,
                   phase1_id = phase1_id)
 
-  df <- dm.childdemand(df)
+  df <- dm.childdemand(df, pop_data)
 
   return(df)
 }
 
 
-#' @title Data management for occupation child demand data
-#' @inheritParams 
+#' @title Data management for child demand data
+#' @inheritParams pop_data population data
 #' @inheritParams dm.occupations 
 #' @export
 
-dm.childdemand <- function(df) {
+dm.childdemand <- function(df, pop_data) {
 
   df <- df %>%
     dplyr:: left_join(pop_data) %>%
@@ -279,10 +281,12 @@ dm.childdemand <- function(df) {
 #' @title Data management for industry data
 #' @inheritParams dm.workforce_board
 #' @inheritParams dm.demand
+#' @inheritParams dm.childdemand
 #' @export
 dm.industry <- function(pth,
                         essential_id = c(14, 19, 18, 1, 2, 3, 15, 4, 0, 13, 6, 12, 7, 11, 8, 10, 9),
-                        phase1_id = c(17, 16, 5)) {
+                        phase1_id = c(17, 16, 5),
+                        pop_data) {
 
   
   df <- readxl::read_excel(pth, sheet = 5) %>% 
@@ -294,7 +298,7 @@ dm.industry <- function(pth,
                   essential_id = essential_id,
                   phase1_id = phase1_id)
 
-  df <- dm.childdemand(df)
+  df <- dm.childdemand(df, pop_data)
   
   return(df)
   
