@@ -54,8 +54,7 @@ map_tx_counties <- dm.tx_counties_map(tx_counties)
 
 pop_data <- dm.pop(pth = "./data/Texas Population Data.xlsx")
 
-occ_data <- dm.occupations(pth = "./data/occupations.xlsx") %>%
-  dplyr::left_join(pop_data)
+occ_data <- dm.occupations(pth = "./data/occupations.xlsx", pop_data = pop_data)
 
-ind_data <- dm.industry(pth = "./data/occupations.xlsx") %>% 
-  dplyr::left_join(pop_data)
+ind_data <- dm.industry(pth = "./data/occupations.xlsx", pop_data = pop_data)
+
