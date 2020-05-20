@@ -181,6 +181,27 @@ dm.tx_counties_map <- function(tx_counties) {
   return(tx_counties)  
 }
 
+#' @title Data management for population data
+#' @inheritParams dm.workforce_board
+#' @export
+dm.pop <- function(pth) {
+  
+  df <- readxl::read_xlsx(pth, sheet = 1) %>% 
+    dplyr::mutate(Geography = gsub("Texas", "TX", `County Name`)) %>%
+    dplyr::select(Geography, `County Name`, `Total Population`, `Total Households`,
+                  `Number People Under 18`, `Households with one or more under 18`) %>%
+    dplyr::rename(n_pop = `Total Population`,
+                  n_hhld = `Total Households`,
+                  n_kid_under18 = `Number People Under 18`,
+                  n_hhld_multiple_kid_under18 = `Households with one or more under 18`) %>%
+    dplyr::mutate(n_kid_under12 = (n_kid_under18/18)*13,
+                  n_ppl_hhld = n_pop/n_hhld,
+                  pct_kid_under12 = (n_kid_under12/n_pop)*100,
+                  n_kid_under12_per_100hhld = (n_kid_under12/n_hhld)*100)
+  
+  return(df)
+}
+
 #' @title Data management for demand data
 #' @param essential_id vector. Vector of numeric ids indicating industries/occupations deemed essential in Texas.
 #' @param phase1_id vector. Vector of numeric ides indicating industries/occupations deemed essential in Texas.
@@ -208,7 +229,7 @@ dm.demand <- function(df, essential_id, phase1_id) {
   df <- df %>% 
     dplyr::filter(value == 1) %>% 
     dplyr::select(-c(value))
-  
+
   x <- df %>%
     dplyr::group_by(variable) %>%
     dplyr::summarise(n = sum(workforce, na.rm = T))
@@ -234,15 +255,30 @@ dm.demand <- function(df, essential_id, phase1_id) {
   return(df)
 }
 
+#' @title Data management for child demand data
+#' @param pop_data dataframe. Dataframe containing the population data at the county level.
+#' @inheritParams dm.occupations 
+#' @export
+dm.childdemand <- function(df, pop_data) {
+  
+  df <- df %>%
+    dplyr:: left_join(pop_data) %>%
+    dplyr:: mutate(n_hhld_w_ess = phase1/n_ppl_hhld, 
+                   n_kid_needcare = .75*(n_kid_under12_per_100hhld*n_hhld_w_ess)/100)
+  
+  return(df)
+  
+}
+
 #' @title Data management for occupation data
 #' @inheritParams dm.workforce_board
 #' @inheritParams dm.demand
 #' @inheritParams dm.childdemand
 #' @export
 dm.occupations <- function(pth,
-                        essential_id = c(23, 21, 19, 7, 13, 12, 9, 16, 10, 15, 11),
-                        phase1_id = c(14, 17, 8),
-                        pop_data
+                           essential_id = c(23, 21, 19, 7, 13, 12, 9, 16, 10, 15, 11),
+                           phase1_id = c(14, 17, 8),
+                           pop_data
                         ) {
 
   df <- readxl::read_excel(pth, sheet = 2) %>%
@@ -260,24 +296,6 @@ dm.occupations <- function(pth,
   return(df)
 }
 
-
-#' @title Data management for child demand data
-#' @inheritParams pop_data population data
-#' @inheritParams dm.occupations 
-#' @export
-
-dm.childdemand <- function(df, pop_data) {
-
-  df <- df %>%
-    dplyr:: left_join(pop_data) %>%
-    dplyr:: mutate(n_hhld_w_ess = phase1/n_ppl_hhld, 
-                   n_kid_needcare = .75*(n_kid_under12_per_100hhld*n_hhld_w_ess)/100) %>%
-    dplyr:: select(`County Name`, n_kid_needcare)
-  
-  return(df)
-  
-}
-
 #' @title Data management for industry data
 #' @inheritParams dm.workforce_board
 #' @inheritParams dm.demand
@@ -287,7 +305,6 @@ dm.industry <- function(pth,
                         essential_id = c(14, 19, 18, 1, 2, 3, 15, 4, 0, 13, 6, 12, 7, 11, 8, 10, 9),
                         phase1_id = c(17, 16, 5),
                         pop_data) {
-
   
   df <- readxl::read_excel(pth, sheet = 5) %>% 
     dplyr::rename(ind_occ_id = `ID Industry`,
@@ -304,49 +321,9 @@ dm.industry <- function(pth,
   
 }
 
-
-#' @title Data management for population data
-#' @inheritParams dm.workforce_board
-#' @export
-dm.pop <- function(pth) {
-  
-  df <- readxl::read_xlsx(pth, sheet = 1) %>% 
-    dplyr::mutate(Geography = gsub("Texas", "TX", `County Name`)) %>%
-    dplyr::select(Geography, `County Name`, `Total Population`, `Total Households`,
-                `Number People Under 18`, `Households with one or more under 18`) %>%
-    dplyr::rename(n_pop = `Total Population`,
-                  n_hhld = `Total Households`,
-                  n_kid_under18 = `Number People Under 18`,
-                  n_hhld_multiple_kid_under18 = `Households with one or more under 18`) %>%
-    dplyr::mutate(n_kid_under12 = (n_kid_under18/18)*13,
-                  n_ppl_hhld = n_pop/n_hhld,
-                  pct_kid_under12 = (n_kid_under12/n_pop)*100,
-                  n_kid_under12_per_100hhld = (n_kid_under12/n_hhld)*100)
-  
-  return(df)
-}
-
-#' @title Data management for child demand data broken down
-#' @inheritParams pop_data population data
-#' @inheritParams 
-#' @export
-
-dm.childdemand_breakdown <- function(df, pop_data) {
-  
-  df <- df %>%
-    dplyr:: left_join(pop_data) %>%
-    dplyr:: mutate(n_hhld_w_ess = phase1/n_ppl_hhld, 
-                   n_kid_needcare = .75*(n_kid_under12_per_100hhld*n_hhld_w_ess)/100) %>%
-    dplyr:: select(ind_occ, n_kid_needcare)
-  
-  return(df)
-  
-}
-
 #' @title Data management for occupation breakdowns
 #' @inheritParams 
-#' export
-
+#' @export
 dm.occ_breakdown <- function(pth, phase1_id = c(8,14,17), pop_data) {
   
   df <- readxl::read_xlsx(pth, sheet=2) %>%
@@ -367,11 +344,11 @@ dm.occ_breakdown <- function(pth, phase1_id = c(8,14,17), pop_data) {
     dplyr:: mutate(workforce = ifelse(ind_occ_id %in% phase1_id, .7*workforce, workforce))
   
   df <- df %>%
-    group_by(Geography, ind_occ) %>%
-    summarise(phase1 = sum(workforce))
+    dplyr::group_by(Geography, ind_occ) %>%
+    dplyr::summarise(phase1 = sum(workforce))
   
-  df <- dm.childdemand_breakdown(df, pop_data) %>%
-    select(Geography, ind_occ, n_kid_needcare)
+  df <- dm.childdemand(df, pop_data) %>%
+    dplyr::select(Geography, ind_occ, n_kid_needcare)
   
   assertthat::assert_that(nrow(df) == 25*254)
   
@@ -381,9 +358,9 @@ dm.occ_breakdown <- function(pth, phase1_id = c(8,14,17), pop_data) {
 
 #' @title Data management for industry breakdowns
 #' @inheritParams 
-#' export
+#' @export
 dm.ind_breakdown <- function(pth, phase1_id = c(17, 16, 5), pop_data) {
-  
+
   df <- readxl::read_xlsx(pth, sheet=5) %>%
     dplyr::rename(ind_occ_id = `ID Industry`,
                   ind_occ = Industry,
@@ -397,18 +374,18 @@ dm.ind_breakdown <- function(pth, phase1_id = c(17, 16, 5), pop_data) {
     dplyr::ungroup()
   
   assertthat::assert_that(all(df$Year %in% c(2017, 2018)))
-  
+
   df <- df %>%
     dplyr:: mutate(workforce = ifelse(ind_occ_id %in% phase1_id, .7*workforce, workforce))
-  
+
   df <- df %>%
-    group_by(Geography, ind_occ) %>%
-    summarise(phase1 = sum(workforce))
-  
-  df <- dm.childdemand_breakdown(df, pop_data) %>%
-    select(Geography, ind_occ, n_kid_needcare)
-  
+    dplyr::group_by(Geography, ind_occ) %>%
+    dplyr::summarise(phase1 = sum(workforce))
+
+  df <- dm.childdemand(df, pop_data) %>%
+    dplyr::select(Geography, ind_occ, n_kid_needcare)
+
   assertthat::assert_that(nrow(df) == 20*254)
-  
+
   return(df)
 }
