@@ -54,4 +54,9 @@ covid <- dm.covid(cases = cases,
 
 map_tx_counties <- dm.tx_counties_map(tx_counties)
 
-# Test change
+pop_data <- dm.pop(pth = "./data/Texas Population Data (2).xlsx")
+
+occ_data <- dm.occ_summary(pth = "./data/occupations.xlsx", pop_data = pop_data)
+
+ind_data <- dm.ind_summary(pth = "./data/occupations.xlsx", pop_data = pop_data)
+
