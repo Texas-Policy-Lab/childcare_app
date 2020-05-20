@@ -189,11 +189,12 @@ dm.pop <- function(pth) {
   df <- readxl::read_xlsx(pth, sheet = 1) %>% 
     dplyr::mutate(Geography = gsub("Texas", "TX", `County Name`)) %>%
     dplyr::select(Geography, `County Name`, `Total Population`, `Total Households`,
-                  `Number People Under 18`, `Households with one or more under 18`) %>%
+                  `Number People Under 18`) %>%
     dplyr::rename(n_pop = `Total Population`,
                   n_hhld = `Total Households`,
-                  n_kid_under18 = `Number People Under 18`,
-                  n_hhld_multiple_kid_under18 = `Households with one or more under 18`) %>%
+                  n_kid_under18 = `Number People Under 18`
+                  # n_hhld_multiple_kid_under18 = `Households with one or more under 18`
+                  ) %>%
     dplyr::mutate(n_kid_under12 = (n_kid_under18/18)*13,
                   n_ppl_hhld = n_pop/n_hhld,
                   pct_kid_under12 = (n_kid_under12/n_pop)*100,
@@ -314,7 +315,7 @@ dm.occ_essential_workforce <- function(pth,
 #' @inheritParams dm.read_ind_data
 #' @export
 dm.ind_essential_workforce <- function(pth,
-                                       essential_id = c(14, 19, 18, 1, 2, 3, 15, 4, 0, 13, 6, 12, 7, 11, 8, 10, 9),
+                                       essential_id = c(15, 3, 14, 11, 6, 13, 4, 19, 8, 7),
                                        phase1_id = c(17, 16, 5)) {
 
   df <- dm.ind_read_data(pth = pth)
