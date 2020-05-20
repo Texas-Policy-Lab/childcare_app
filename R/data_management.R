@@ -321,17 +321,60 @@ dm.pop <- function(pth) {
     dplyr::mutate(n_kid_under12 = (n_kid_under18/18)*13,
                   n_ppl_hhld = n_pop/n_hhld,
                   pct_kid_under12 = (n_kid_under12/n_pop)*100,
-                  n_kid_under12_per_100hhld = (n_kid_under12/n_hhld)*100
-    )
+                  n_kid_under12_per_100hhld = (n_kid_under12/n_hhld)*100)
+  
+  return(df)
+}
+
+#' @title Data management for child demand data broken down
+#' @inheritParams pop_data population data
+#' @inheritParams 
+#' @export
+
+dm.childdemand_breakdown <- function(df, pop_data) {
+  
+  df <- df %>%
+    dplyr:: left_join(pop_data) %>%
+    dplyr:: mutate(n_hhld_w_ess = phase1/n_ppl_hhld, 
+                   n_kid_needcare = .75*(n_kid_under12_per_100hhld*n_hhld_w_ess)/100) %>%
+    dplyr:: select(ind_occ, n_kid_needcare)
+  
+  return(df)
+  
 }
 
 #' @title Data management for occupation breakdowns
 #' @inheritParams 
 #' export
 
-dm.occ_breakdown <- function(pth, all_id = seq(0,24,1), phase1_id = c(8,14,17), pop_data) {
+dm.occ_breakdown <- function(pth, phase1_id = c(8,14,17), pop_data) {
   
-    
+  df <- readxl::read_xlsx(pth, sheet=2) %>%
+    dplyr::rename(ind_occ_id = `ID Occupation`,
+                  ind_occ = Occupation,
+                  workforce = `Workforce by Occupation and Gender`)
+  
+  df <- df %>% 
+    dplyr::select(Geography, ind_occ_id, ind_occ, Year, workforce) %>%
+    dplyr::arrange(desc(Year)) %>%
+    dplyr::group_by(Geography, ind_occ_id) %>%
+    dplyr::slice(1) %>% 
+    dplyr::ungroup()
+  
+  assertthat::assert_that(all(df$Year %in% c(2017, 2018)))
+  
+  df <- df %>%
+    dplyr:: mutate(workforce = ifelse(ind_occ_id %in% phase1_id, .7*workforce, workforce))
+  
+  df <- df %>%
+    group_by(Geography, ind_occ) %>%
+    summarise(phase1 = sum(workforce))
+  
+  df <- dm.childdemand_breakdown(df, pop_data) %>%
+    select(Geography, ind_occ, n_kid_needcare)
+  
+  assertthat::assert_that(nrow(df) == 25*254)
+  
   return(df)
 }
 
@@ -360,9 +403,12 @@ dm.ind_breakdown <- function(pth, phase1_id = c(17, 16, 5), pop_data) {
   
   df <- df %>%
     group_by(Geography, ind_occ) %>%
-    summarise(workers = sum(workforce))
+    summarise(phase1 = sum(workforce))
   
-  df <- dm.childdemand(df, pop_data)
+  df <- dm.childdemand_breakdown(df, pop_data) %>%
+    select(Geography, ind_occ, n_kid_needcare)
+  
+  assertthat::assert_that(nrow(df) == 20*254)
   
   return(df)
 }
