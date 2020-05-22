@@ -106,7 +106,10 @@ read_dshs <- function(pth, tx_counties) {
     df <- readxl::read_excel(temp, sheet = 1, skip = 2)
   }
 
-  assertthat::assert_that(names(df)[1] == "County\r\nName")
+  names(df)[1] <- stringr::str_replace_all(names(df)[1], "[\r\n]" , " ")
+  names(df)[1] <- stringr::str_replace_all(names(df)[1], "  ", " ")
+  
+  assertthat::assert_that(names(df)[1] == "County Name")
   
   df <- df %>% 
     dplyr::rename(county = 1) %>% 
