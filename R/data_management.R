@@ -275,16 +275,13 @@ dm.essential_workforce <- function(df, essential_id, phase1_id, phase2_id) {
 
   df <- df %>% 
     dplyr::select(-Year) %>% 
-    dplyr::mutate(essential = dplyr::case_when(ind_occ_id %in% 
-                                                 essential_id ~ workforce,
-                                                 TRUE ~ 0),
-                  phase1 = dplyr::case_when(ind_occ_id %in% 
-                                              c(phase1_id, phase2_id) ~ .70*workforce,
-                                                TRUE ~ workforce),
-                  phase2 = dplyr::case_when(ind_occ_id %in% 
-                                              phase1_id ~ .7*workforce,
-                                              ind_occ_id %in% phase2_id ~ .78*workforce,
-                                              TRUE ~ workforce
+    dplyr::mutate(essential = dplyr::case_when(ind_occ_id %in% essential_id ~ workforce,
+                                               TRUE ~ 0),
+                  phase1 = dplyr::case_when(ind_occ_id %in% c(phase1_id, phase2_id) ~ .70*workforce,
+                                            TRUE ~ workforce),
+                  phase2 = dplyr::case_when(ind_occ_id %in% phase1_id ~ .7*workforce,
+                                            ind_occ_id %in% phase2_id ~ .78*workforce,
+                                            TRUE ~ workforce
                                                       ) 
                   ) %>% 
     dplyr::select(-workforce)
