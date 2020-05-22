@@ -60,3 +60,10 @@ occ_data <- dm.occ_summary(pth = "./data/occupations.xlsx", pop_data = pop_data)
 
 ind_data <- dm.ind_summary(pth = "./data/occupations.xlsx", pop_data = pop_data)
 
+df <- occ_data %>% 
+  dplyr::select(Geography, n_kid_needcare_phase2) %>% 
+  dplyr::rename(n_kid_needcare_phase2_occ = n_kid_needcare_phase2) %>% 
+  dplyr::left_join(ind_data %>% 
+                     dplyr::select(Geography, n_kid_needcare_phase2) %>% 
+                     dplyr::rename(n_kid_needcare_phase2_ind = n_kid_needcare_phase2))
+
