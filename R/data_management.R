@@ -256,7 +256,7 @@ dm.ind_read_data <- function(pth) {
 #' @param essential_id vector. Vector of numeric ids indicating industries/occupations deemed essential in Texas.
 #' @param phase1_id vector. Vector of numeric ides indicating industries/occupations deemed essential in Texas.
 #' @export
-dm.essential_workforce <- function(df, essential_id, phase1_id) {
+dm.essential_workforce <- function(df, essential_id, phase1_id, phase2_id) {
   
   # Select most recent years for each Geography and industry or occupation
   
@@ -305,7 +305,8 @@ dm.essential_workforce <- function(df, essential_id, phase1_id) {
 #' @export
 dm.occ_essential_workforce <- function(pth, 
                                        essential_id = c(23, 21, 19, 7, 13, 12, 9, 16, 10, 15, 11),
-                                       phase1_id = c(14, 17, 8)) {
+                                       phase1_id = c(14, 17),
+                                       phase2_id = c(8)) {
 
   df <- dm.occ_read_data(pth = pth)
   df <- dm.essential_workforce(df = df, 
@@ -321,7 +322,8 @@ dm.occ_essential_workforce <- function(pth,
 #' @export
 dm.ind_essential_workforce <- function(pth,
                                        essential_id = c(15, 3, 14, 11, 6, 13, 4, 19, 8, 7),
-                                       phase1_id = c(17, 16, 5)) {
+                                       phase1_id = c(16, 5),
+                                       phase2_id = c(17)) {
 
   df <- dm.ind_read_data(pth = pth)
   df <- dm.essential_workforce(df = df, 
