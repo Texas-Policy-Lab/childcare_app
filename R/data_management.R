@@ -216,7 +216,7 @@ dm.childdemand <- function(df, pop_data) {
   
   df <- df %>%
     dplyr:: left_join(pop_data) %>%
-    dplyr:: mutate(n_hhld_w_ess = phase1/n_ppl_hhld, 
+    dplyr:: mutate(n_hhld_w_ess = phase2/n_ppl_hhld, 
                    n_kid_needcare = .75*(n_kid_under12_per_100hhld*n_hhld_w_ess)/100)
   
   return(df)
@@ -276,7 +276,7 @@ dm.essential_workforce <- function(df, essential_id, phase1_id, phase2_id) {
                   phase1 = dplyr::if_else(ind_occ_id %in% c(essential_id, phase1_id), 1, 0),
                   phase2 = dplyr::if_else(ind_occ_id %in% c(essential_id, phase1_id, phase2_id), 1, 0),
                   workforce = ifelse(ind_occ_id %in% phase1_id, .7*workforce, workforce),
-                  workfroce = ifelse(ind_occ_id %in% phase2_id, .78*workforce, workforce)) %>% 
+                  workforce = ifelse(ind_occ_id %in% phase2_id, .78*workforce, workforce)) %>% 
     tidyr::gather(variable, value, -c(Geography, ind_occ_id, ind_occ, workforce))
   
   assertthat::assert_that(all(df%>% dplyr::filter(variable == "phase2")  %>% dplyr::select(value) == 1))
@@ -434,3 +434,4 @@ dm.ind_breakdown <- function(pth) {
 
   return(df)
 }
+
