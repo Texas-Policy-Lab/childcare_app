@@ -397,7 +397,7 @@ dm.occ_breakdown <- function(pth) {
   df <- dm.occ_essential_workforce(pth = pth)
 
   df <- df %>% 
-    tidyr::spread(variable, workforce) %>% 
+    tidyr::spread(reopening, workforce) %>% 
     dplyr::mutate(`County Name` = gsub("TX", "Texas", Geography))
 
   assertthat::assert_that(nrow(df) == 14*254)
@@ -414,10 +414,10 @@ dm.ind_breakdown <- function(pth) {
   df <- dm.ind_essential_workforce(pth = pth)
 
   df <- df %>% 
-    tidyr::spread(variable, workforce) %>% 
+    tidyr::spread(reopening, workforce) %>% 
     dplyr::mutate(`County Name` = gsub("TX", "Texas", Geography))
 
-  assertthat::assert_that(nrow(df) == 20*254)
+  assertthat::assert_that(nrow(df) == 13*254)
 
   return(df)
 }
