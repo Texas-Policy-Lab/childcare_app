@@ -262,7 +262,7 @@ dm.essential_workforce <- function(df, essential_id, phase1_id, phase2_id) {
   
   df <- df %>% 
     dplyr::select(Geography, ind_occ_id, ind_occ, Year, workforce) %>%
-    dplyr::filter(ind_occ_id %in% c(essential_id, phase1_id)) %>%
+    dplyr::filter(ind_occ_id %in% c(essential_id, phase1_id, phase2_id)) %>%
     dplyr::arrange(desc(Year)) %>%
     dplyr::group_by(Geography, ind_occ_id) %>%
     dplyr::slice(1) %>% 
@@ -274,10 +274,12 @@ dm.essential_workforce <- function(df, essential_id, phase1_id, phase2_id) {
     dplyr::select(-Year) %>% 
     dplyr::mutate(essential = dplyr::if_else(ind_occ_id %in% essential_id, 1, 0),
                   phase1 = dplyr::if_else(ind_occ_id %in% c(essential_id, phase1_id), 1, 0),
-                  workforce = ifelse(ind_occ_id %in% phase1_id, .7*workforce, workforce)) %>% 
+                  phase2 = dplyr::if_else(ind_occ_id %in% c(essential_id, phase1_id, phase2_id), 1, 0),
+                  workforce = ifelse(ind_occ_id %in% phase1_id, .7*workforce, workforce),
+                  workfroce = ifelse(ind_occ_id %in% phase2_id, .78*workforce, workforce)) %>% 
     tidyr::gather(variable, value, -c(Geography, ind_occ_id, ind_occ, workforce))
   
-  assertthat::assert_that(all(df%>% dplyr::filter(variable == "phase1")  %>% dplyr::select(value) == 1))
+  assertthat::assert_that(all(df%>% dplyr::filter(variable == "phase2")  %>% dplyr::select(value) == 1))
   
   df <- df %>% 
     dplyr::filter(value == 1) %>% 
@@ -293,6 +295,15 @@ dm.essential_workforce <- function(df, essential_id, phase1_id, phase2_id) {
                             dplyr::pull(n) <
                             x %>%
                             dplyr::filter(variable == "phase1") %>%
+                            dplyr::select(n) %>%
+                            dplyr::pull(n))
+  
+  assertthat::assert_that(x %>%
+                            dplyr::filter(variable == "phase1") %>%
+                            dplyr::select(n) %>%
+                            dplyr::pull(n) <
+                            x %>%
+                            dplyr::filter(variable == "phase2") %>%
                             dplyr::select(n) %>%
                             dplyr::pull(n))
 
@@ -311,7 +322,8 @@ dm.occ_essential_workforce <- function(pth,
   df <- dm.occ_read_data(pth = pth)
   df <- dm.essential_workforce(df = df, 
                                essential_id = essential_id,
-                               phase1_id = phase1_id)
+                               phase1_id = phase1_id,
+                               phase2_id = phase2_id)
 
   return(df)
 }
@@ -328,7 +340,8 @@ dm.ind_essential_workforce <- function(pth,
   df <- dm.ind_read_data(pth = pth)
   df <- dm.essential_workforce(df = df, 
                                essential_id = essential_id, 
-                               phase1_id = phase1_id)
+                               phase1_id = phase1_id,
+                               phase2_id = phase2_id)
   return(df)
 }
 
