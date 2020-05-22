@@ -216,8 +216,10 @@ dm.childdemand <- function(df, pop_data) {
   
   df <- df %>%
     dplyr:: left_join(pop_data) %>%
-    dplyr:: mutate(n_hhld_w_ess = phase2/n_ppl_hhld, 
-                   n_kid_needcare = .75*(n_kid_under12_per_100hhld*n_hhld_w_ess)/100)
+    dplyr:: mutate(n_hhld_w_ess_phase1 = phase1/n_ppl_hhld,
+                   n_hhld_w_ess_phase2 = phase2/n_ppl_hhld,
+                   n_kid_needcare_phase1 = .75*(n_kid_under12_per_100hhld*n_hhld_w_ess_phase1)/100,
+                   n_kid_needcare_phase2 = .75*(n_kid_under12_per_100hhld*n_hhld_w_ess_phase2)/100)
   
   return(df)
   
@@ -254,7 +256,8 @@ dm.ind_read_data <- function(pth) {
 #' @title Data management to create the number of essential workers
 #' @param df dataframe. The data frame to apply data management steps to.
 #' @param essential_id vector. Vector of numeric ids indicating industries/occupations deemed essential in Texas.
-#' @param phase1_id vector. Vector of numeric ides indicating industries/occupations deemed essential in Texas.
+#' @param phase1_id vector. Vector of numeric ids indicating industries/occupations deemed essential in Texas for phase 1 of reopening
+#' @param phase2_id vector. Vector of numeric ids indicating industries/occupations deemed essential in Texas for phase 2 of reopening
 #' @export
 dm.essential_workforce <- function(df, essential_id, phase1_id, phase2_id) {
   
@@ -272,52 +275,38 @@ dm.essential_workforce <- function(df, essential_id, phase1_id, phase2_id) {
 
   df <- df %>% 
     dplyr::select(-Year) %>% 
-    dplyr::mutate(essential = dplyr::if_else(ind_occ_id %in% essential_id, 1, 0),
-                  phase1 = dplyr::if_else(ind_occ_id %in% c(essential_id, phase1_id), 1, 0),
-                  phase2 = dplyr::if_else(ind_occ_id %in% c(essential_id, phase1_id, phase2_id), 1, 0),
-                  workforce = ifelse(ind_occ_id %in% phase1_id, .7*workforce, workforce),
-                  workforce = ifelse(ind_occ_id %in% phase2_id, .78*workforce, workforce)) %>% 
-    tidyr::gather(variable, value, -c(Geography, ind_occ_id, ind_occ, workforce))
-  
-  assertthat::assert_that(all(df%>% dplyr::filter(variable == "phase2")  %>% dplyr::select(value) == 1))
-  
-  df <- df %>% 
-    dplyr::filter(value == 1) %>% 
-    dplyr::select(-c(value))
+    dplyr::mutate(essential = dplyr::case_when(ind_occ_id %in% 
+                                                 essential_id ~ workforce,
+                                                 TRUE ~ 0),
+                  phase1 = dplyr::case_when(ind_occ_id %in% 
+                                              c(phase1_id, phase2_id) ~ .70*workforce,
+                                                TRUE ~ workforce),
+                  phase2 = dplyr::case_when(ind_occ_id %in% 
+                                              phase1_id ~ .7*workforce,
+                                              ind_occ_id %in% phase2_id ~ .78*workforce,
+                                              TRUE ~ workforce
+                                                      ) 
+                  ) %>% 
+    dplyr::select(-workforce)
 
-  x <- df %>%
-    dplyr::group_by(variable) %>%
-    dplyr::summarise(n = sum(workforce, na.rm = T))
-  
-  assertthat::assert_that(x %>%
-                            dplyr::filter(variable == "essential") %>%
-                            dplyr::select(n) %>%
-                            dplyr::pull(n) <
-                            x %>%
-                            dplyr::filter(variable == "phase1") %>%
-                            dplyr::select(n) %>%
-                            dplyr::pull(n))
-  
-  assertthat::assert_that(x %>%
-                            dplyr::filter(variable == "phase1") %>%
-                            dplyr::select(n) %>%
-                            dplyr::pull(n) <
-                            x %>%
-                            dplyr::filter(variable == "phase2") %>%
-                            dplyr::select(n) %>%
-                            dplyr::pull(n))
+  assertthat::assert_that(all(df$essential <= df$phase1))
+  assertthat::assert_that(all(df$phase1 <= df$phase2))
+    
+  df_long <- df %>% 
+    tidyr::gather(reopening, workforce, -c(Geography, ind_occ_id, ind_occ))
 
-  return(df)
+  return(df_long)
 }
 
 #' @title Data management essential occupations
 #' @description Data management to create the number of essential workers for occupations
 #' @inheritParams dm.read_occ_data
+#' @inheritParams dm.essential_workforce
 #' @export
 dm.occ_essential_workforce <- function(pth, 
                                        essential_id = c(23, 21, 19, 7, 13, 12, 9, 16, 10, 15, 11),
                                        phase1_id = c(14, 17),
-                                       phase2_id = c(8)) {
+                                       phase2_id = 8) {
 
   df <- dm.occ_read_data(pth = pth)
   df <- dm.essential_workforce(df = df, 
@@ -331,11 +320,12 @@ dm.occ_essential_workforce <- function(pth,
 #' @title Data management essential industries
 #' @description Data management to create the number of essential works for industries
 #' @inheritParams dm.read_ind_data
+#' @inheritParams dm.essential_workforce
 #' @export
 dm.ind_essential_workforce <- function(pth,
                                        essential_id = c(15, 3, 14, 11, 6, 13, 4, 19, 8, 7),
                                        phase1_id = c(16, 5),
-                                       phase2_id = c(17)) {
+                                       phase2_id = 17) {
 
   df <- dm.ind_read_data(pth = pth)
   df <- dm.essential_workforce(df = df, 
@@ -350,9 +340,9 @@ dm.ind_essential_workforce <- function(pth,
 dm.summarize_essential_workforce <- function(df) {
 
   df <- df %>%
-    dplyr::group_by(Geography, variable) %>%
+    dplyr::group_by(Geography, reopening) %>%
     dplyr::summarise(workforce = sum(workforce))%>%
-    tidyr::spread(variable, workforce) %>%
+    tidyr::spread(reopening, workforce) %>%
     dplyr::mutate(`County Name` = gsub("TX", "Texas", Geography)) %>%
     dplyr::ungroup()
 
