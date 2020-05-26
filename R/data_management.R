@@ -106,10 +106,9 @@ read_dshs <- function(pth, tx_counties) {
     df <- readxl::read_excel(temp, sheet = 1, skip = 2)
   }
 
-  names(df)[1] <- stringr::str_replace_all(names(df)[1], "[\r\n]" , " ")
-  names(df)[1] <- stringr::str_replace_all(names(df)[1], "  ", " ")
-  
-  assertthat::assert_that(names(df)[1] == "County Name")
+  names(df) <- stringr::str_replace_all(names(df), "[\r|\n]" , " ")
+
+  assertthat::assert_that(grepl("county", tolower(names(df)[1])))
   
   df <- df %>% 
     dplyr::rename(county = 1) %>% 
@@ -118,15 +117,26 @@ read_dshs <- function(pth, tx_counties) {
     dplyr::select(-Population) %>% 
     tidyr::gather(variable, value, -c(county)) %>% 
     dplyr::mutate(variable = gsub("Cases|Fatalities", "", variable),
-                  variable = stringr::str_replace_all(variable, "[\r\n]" , ""),
-                  variable = paste0(variable, "-2020"),
-                  date = lubridate::mdy(variable),
-                  county = gsub("\r\n", " ", county),
-                  value = as.numeric(value)) %>% 
+                  variable = stringr::str_trim(variable, "both"),
+                  value = as.numeric(value))
+
+  if(any(is.na(as.numeric(df$variable)))) {
+
+    df <- df %>%
+      dplyr::mutate(variable = paste0(variable, "-2020"),
+                    date = lubridate::mdy(variable))
+
+  } else {
+    df <- df %>% 
+      dplyr::mutate(date = as.Date(as.numeric(variable), origin = "1899-12-30"))
+  }
+  
+  df <- df %>%
     dplyr::select(-variable) %>% 
     dplyr::arrange(county, desc(date)) %>% 
     dplyr::group_by(county) %>% 
     dplyr::slice(1)
+
 }
 
 #' @title Data management cases
