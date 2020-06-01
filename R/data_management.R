@@ -31,8 +31,10 @@ dm.tx_counties <- function(pth) {
 #' @inheritParams dm.workforce_board
 #' @export
 dm.estimates <- function(pth) {
-  est <- readr::read_csv(pth) %>% 
-    dplyr::mutate(county = gsub(" County", "", county)) 
+
+  est <- readr::read_csv(pth) %>%
+    dplyr::rename(county_merge = COUNTY) %>% 
+    dplyr::mutate(county_merge = tolower(county_merge))
 }
 
 #' @title Data management Child care seats estimates
@@ -42,15 +44,18 @@ dm.estimates <- function(pth) {
 dm.estimates_ccs <- function(est, tx_counties) {
 
   est_ccs <- est %>% 
-    dplyr::select(county, dplyr::starts_with("ccs_per_100")) %>% 
-    tidyr::gather(variable, est_ccs , -c(county)) %>% 
-    dplyr::mutate(label = ifelse(est_ccs > 35, "> 35",
+    dplyr::select(county_merge, LsupplyUpper, LsupplyLower, MsupplyUpper, MsupplyLower, HsupplyUpper, HsupplyLower) %>% 
+    tidyr::gather(variable, est_ccs , -c(county_merge)) %>% 
+    dplyr::mutate(est_ccs = ifelse(est_ccs == -9999, NA, est_ccs),
+                  label = ifelse(est_ccs > 35, "> 35",
                                  ifelse(est_ccs <= 35 & est_ccs > 15, "> 15 & <= 35", "< 15")),
-                  demand = ifelse(grepl("occ", variable), "Occupation", "Industry"),
-                  supply = ifelse(grepl("low", variable), "Low",
-                                  ifelse(grepl("med", variable), "Medium", "High"))) %>% 
-    dplyr::select(-variable) %>% 
-    dplyr::left_join(tx_counties)
+                  demand = ifelse(grepl("Lower", variable), "Occupation", "Industry"),
+                  supply = ifelse(grepl("Lsupply", variable), "Low",
+                                  ifelse(grepl("Msupply", variable), "Medium", "High"))) %>% 
+    dplyr::select(-variable) %>%
+    dplyr::left_join(tx_counties %>% 
+                       dplyr::mutate(county_merge = tolower(county))) %>% 
+    dplyr::select(-county_merge)
   
   assertthat::assert_that(sum(is.na(est_ccs$county_fips)) == 0)
   assertthat::assert_that(sum(is.na(est_ccs$county_name)) == 0)
@@ -65,10 +70,12 @@ dm.estimates_ccs <- function(est, tx_counties) {
 dm.estimates_demand <- function(est, tx_counties) {
 
   est_d <- est %>% 
-    dplyr::select(county, dplyr::contains("Demand")) %>%
-    tidyr::gather(demand, est_demand , -c(county)) %>%  
+    dplyr::select(county_merge, LowerRangeOccupation, UpperRangeIndustry) %>%
+    tidyr::gather(demand, est_demand , -c(county_merge)) %>%  
     dplyr::mutate(demand = ifelse(grepl("Occupation", demand), "Occupation", "Industry")) %>% 
-    dplyr::left_join(tx_counties)
+    dplyr::left_join(tx_counties %>% 
+                       dplyr::mutate(county_merge = tolower(county))) %>% 
+    dplyr::select(-county_merge)
   
   assertthat::assert_that(sum(is.na(est_d$county_fips)) == 0)
   assertthat::assert_that(sum(is.na(est_d$county_name)) == 0)
@@ -83,10 +90,14 @@ dm.estimates_demand <- function(est, tx_counties) {
 dm.estimates_supply <- function(est, tx_counties) {
 
   est_s <- est %>%
-    dplyr::select(county, dplyr::contains("supply")) %>% 
-    tidyr::gather(supply, est_supply, -c(county)) %>% 
-    dplyr::mutate(supply = gsub(" supply scenario", "", supply)) %>% 
-    dplyr::left_join(tx_counties)
+    dplyr::select(county_merge, low_supply, med_supply, hi_supply) %>% 
+    tidyr::gather(supply, est_supply, -c(county_merge)) %>% 
+    dplyr::mutate(supply = dplyr::case_when(supply == "hi_supply" ~ "High",
+                                             supply == "med_supply" ~ "Medium",
+                                             supply == "low_supply" ~ "Low")) %>% 
+    dplyr::left_join(tx_counties %>% 
+                       dplyr::mutate(county_merge = tolower(county))) %>% 
+    dplyr::select(-county_merge)
 
   assertthat::assert_that(sum(is.na(est_s$county_fips)) == 0)
   assertthat::assert_that(sum(is.na(est_s$county_name)) == 0)
