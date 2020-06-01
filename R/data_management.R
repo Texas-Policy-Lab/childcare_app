@@ -49,6 +49,7 @@ dm.estimates_ccs <- function(est, tx_counties) {
     dplyr::mutate(est_ccs = ifelse(est_ccs == -9999, NA, est_ccs),
                   label = ifelse(est_ccs > 35, "> 35",
                                  ifelse(est_ccs <= 35 & est_ccs > 15, "> 15 & <= 35", "< 15")),
+                  # label = factor(label),
                   demand = ifelse(grepl("Lower", variable), "Occupation", "Industry"),
                   supply = ifelse(grepl("Lsupply", variable), "Low",
                                   ifelse(grepl("Msupply", variable), "Medium", "High"))) %>% 
