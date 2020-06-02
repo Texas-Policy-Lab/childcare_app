@@ -1,0 +1,287 @@
+---
+output: html_document
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(echo = FALSE, message = FALSE, warning = FALSE)
+library(tpltheme)
+library(magrittr)
+library(ggplot2)
+set_tpl_theme()
+
+lapply(list.files("../images", full.names = TRUE), file.remove)
+
+pth <- "C:/Users/jh111/Box/Partnerships/TWC/Projects/COVID19 Childcare/Drafts/Data visuals/June 2 ADA update"
+
+```
+
+```{r}
+df <- readr::read_csv("../data/ada (2).csv") %>% 
+  tidyr::gather(scenario, value, c(low_scenario, medium_scenario, high_scenario)) %>% 
+  dplyr::mutate(non_subsidy = ifelse(grepl("not accept subsidy",
+                                           tolower(`group type`)), TRUE, FALSE),
+                subsidy = ifelse(non_subsidy, FALSE, TRUE),
+                home_prvdr = ifelse(grepl("home", tolower(`group type`)), TRUE, FALSE),
+                center_prvdr = ifelse(home_prvdr, FALSE, TRUE),
+                low_scen = ifelse(grepl("low", tolower(scenario)), TRUE, FALSE),
+                med_scen = ifelse(grepl("medium", tolower(scenario)), TRUE, FALSE),
+                high_scen = ifelse(grepl("high", tolower(scenario)), TRUE, FALSE),
+                Scenario = dplyr::case_when(low_scen ~ "Low",
+                                            med_scen ~ "Medium",
+                                            high_scen ~ "High"),
+                Scenario = ordered(Scenario, level = c("Low", "Medium", "High")),
+                prvdr_type = ifelse(home_prvdr, "Home provider", "Center provider"),
+                type = dplyr::case_when(grepl("Small Size", `group type`) ~ "Small (0-50)",
+                                        grepl("Medium Size", `group type`) ~ "Medium (51-99)",
+                                        grepl("Large Size", `group type`) ~ "Large (100+)",
+                                        grepl("Licensed Home", `group type`) ~ "Licensed Home",
+                                        grepl("Registered Home", `group type`) ~ "Registered Home"),
+                type = ordered(type, c("Small (0-50)", "Medium (51-99)", "Large (100+)", "Licensed Home", "Registered Home")),
+                `Subsidy status` = ifelse(subsidy, "Subsidy", "Non-Subsidy"),
+                value = value*100
+                ) %>% 
+  dplyr::select(-`group type`)
+
+```
+
+#### Average daily attendance as a percent of licensed capacity
+
+```{r}
+
+p1 <- ggplot(df %>% 
+         dplyr::filter(home_prvdr) 
+        , aes(x = forcats::fct_relabel(type,
+                                    stringr::str_wrap,
+                                    width = 5), y = value, fill = Scenario)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(. ~ `Subsidy status`) + 
+  labs(x = "Provider type"
+      ,y = "Percent"
+       ) +
+  theme_minimal() +
+  theme(
+    panel.grid.major.x = element_blank(),
+    strip.text.x = element_text(
+      size = 12, color = "black", face = "bold.italic"
+      )
+    ) +
+  ylim(0, 100)
+
+p2 <- ggplot(df %>% 
+         dplyr::filter(center_prvdr) 
+         , aes(x = forcats::fct_relabel(type,
+                                    stringr::str_wrap,
+                                    width = 5), y = value, fill = Scenario)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(. ~ `Subsidy status`) + 
+  labs(x = "Center size"
+      ,y = "Percent"
+       ) +
+  theme_minimal() +
+  theme(
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    strip.text.x = element_text(
+      size = 12, color = "black", face = "bold.italic"
+      )
+    )  +
+  ylim(0, 100)
+
+p <- cowplot::plot_grid(p1, p2,
+                   ncol = 1,
+                   # labels = c('Home Providers', 'Center Providers'),
+                   label_size = 12,
+                   rel_widths = c(2, 2))
+p
+ggsave("../images/provider_type-supply_scenario-subsidy.png", dpi = 1200)
+ggsave(file.path(pth, "provider_type-supply_scenario-subsidy.png"), dpi = 1200)
+ggsave("../images/provider_type-supply_scenario-subsidy.svg")
+
+```
+
+#### Average daily attendance as a percent of licensed capacity home providers vs. center providers
+
+```{r}
+p <- ggplot(df %>% 
+         dplyr::filter(med_scen)
+         , aes(x = forcats::fct_relabel(type,
+                                    stringr::str_wrap,
+                                    width = 5), y = value, fill = `Subsidy status`)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(. ~ prvdr_type, scales = "free_x") + 
+  labs(x = "Provider type"
+      ,y = "Percent"
+      ,title = stringr::str_wrap("Average daily attendance as a percent of licensed capacity by provider type and subsidy status for the medium supply scenario", 70)
+       ) +
+  theme_minimal() +
+  theme(
+    strip.text.x = element_text(
+      size = 12, color = "black", face = "bold.italic"
+      ),
+    panel.grid.minor.y = element_blank(),
+    panel.grid.major.x = element_blank()
+    )  +
+  scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 12.5))
+
+p
+ggsave("../images/provider_type-medium_supply_scenario-subsidy.png", dpi = 1200)
+ggsave(file.path(pth, "provider_type-medium_supply_scenario-subsidy.png"), dpi = 1200)
+ggsave("../images/provider_type-medium_supply_scenario-subsidy.svg")
+
+```
+
+
+```{r}
+df1 <- df %>% 
+  dplyr::filter(med_scen) %>% 
+  dplyr::group_by(`Subsidy status`, prvdr_type) %>% 
+  dplyr::summarise(avg_ada = mean(value))
+
+p <- ggplot(df1
+         , aes(x = prvdr_type, y = avg_ada, fill = `Subsidy status`)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Provider type"
+      ,y = "Percent"
+      ,title = stringr::str_wrap("Average daily attendance as a percent of licensed capacity by provider type and subsidy status under medium supply scenario", 70)) +
+  theme_minimal() +
+  theme(
+    strip.text.x = element_text(
+      size = 12, color = "black", face = "bold.italic"
+      ),
+    panel.grid.minor.y = element_blank(),
+    panel.grid.major.x = element_blank()
+    )  +
+  scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 12.5))
+
+p
+ggsave("../images/avg-ada_medium-scenario_subsidy-status_provider-type.png", dpi = 1200)
+ggsave(file.path(pth, "avg-ada_medium-scenario_subsidy-status_provider-type.png"), dpi = 1200)
+ggsave("../images/avg-ada_medium-scenario_subsidy-status_provider-type.svg")
+
+```
+
+```{r}
+df1 <- df %>% 
+  dplyr::filter(med_scen) %>% 
+  dplyr::group_by(prvdr_type) %>% 
+  dplyr::summarise(avg_ada = mean(value),
+                   avg_sd = mean(std_pct*100))
+
+p <- ggplot(df1, aes(x=prvdr_type, y=avg_ada)) +
+  geom_bar(stat="identity",
+           position = "dodge", alpha=0.7) +
+  geom_errorbar(aes(x = prvdr_type,
+                    ymin = avg_ada - (avg_sd),
+                    ymax = avg_ada + (avg_sd)),
+                width = 0.2, alpha = 0.9, size = 1.3, position = position_dodge(0.9)) +
+ labs(x = "Provider type"
+     ,y = "Percent"
+     ,title = "ADA as a percent of licensed capacity by provider type"
+     ,caption = stringr::str_wrap("Error bars represent ADA under low and high scenarios (mean +/- std. deviation of ADA as a percent of licensed capacity)", 120)
+       ) +
+  theme_minimal() +
+  theme(
+    strip.text.x = element_text(
+      size = 12, color = "black", face = "bold.italic"
+      ),
+    panel.grid.minor.y = element_blank(),
+    panel.grid.major.x = element_blank(),
+    plot.caption = element_text(size = 9,
+                                hjust = 0.92,
+                                margin = margin(t = 0.2,
+                                                b = 0,
+                                                unit = "cm"),
+                                color = "#939184",
+                                family="Arial"
+                              )
+    )  +
+  scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 12.5))
+
+p
+ggsave("../images/bar-error-bars_subsidy-status_provider-type-overall.png", dpi = 1200)
+ggsave(file.path(pth, "bar-error-bars_subsidy-status_provider-type-overall.png"), dpi = 1200)
+ggsave("../images/bar-error-bars_subsidy-status_provider-type-overall.svg")
+```
+
+```{r}
+df1 <- df %>% 
+  dplyr::group_by(Scenario, prvdr_type) %>% 
+  dplyr::summarise(avg_ada = mean(value))
+
+p <- ggplot(df1
+         , aes(x = prvdr_type, y = avg_ada, fill = Scenario)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Provider type"
+      ,y = "Percent"
+      ,title = stringr::str_wrap("Average daily attendance as a percent of licensed capacity by provider type and supply scenario", 70)) +
+  theme_minimal() +
+  theme(
+    strip.text.x = element_text(
+      size = 12, color = "black", face = "bold.italic"
+      ),
+    panel.grid.minor.y = element_blank(),
+    panel.grid.major.x = element_blank(),
+    plot.caption = element_text(size = 9,
+                                hjust = 0.92,
+                                margin = margin(t = 0.2,
+                                                b = 0,
+                                                unit = "cm"),
+                                color = "#939184",
+                                family="Arial"
+                              )
+    )  +
+  scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 12.5))
+
+p
+ggsave("../images/avg-ada_supply-scenario_provider-type.png", dpi = 1200)
+ggsave(file.path(pth, "avg-ada_supply-scenario_provider-type.png"), dpi = 1200)
+ggsave("../images/avg-ada_supply-scenario_provider-type.svg")
+
+```
+
+```{r}
+
+p <- ggplot(df %>% 
+  dplyr::filter(med_scen), aes(x=forcats::fct_relabel(type,
+                                    stringr::str_wrap,
+                                    width = 5), y=value)) +
+  geom_bar(aes(fill = `Subsidy status`),
+           stat="identity",
+           position = "dodge", alpha=0.7) +
+  geom_errorbar(aes(
+     x = forcats::fct_relabel(type,
+                                    stringr::str_wrap,
+                                    width = 5), color = `Subsidy status`,
+                    ymin = value - (std_pct)*100,
+                    ymax = value + (std_pct)*100),
+                width=0.2, alpha=0.9, size=1.3, position = position_dodge(0.9)) +
+  facet_wrap(. ~ prvdr_type, scales = "free_x") + 
+  labs(x = "Provider type"
+       ,y = "Percent"
+       ,title = "ADA as a percent of licensed capacity by provider type and subsidy status"
+       ,caption = stringr::str_wrap("Error bars represent ADA under low and high scenarios (mean +/- std. deviation of ADA as a percent of licensed capacity)", 90)
+       ) +
+    theme_minimal() +
+  theme(
+    strip.text.x = element_text(
+      size = 12, color = "black", face = "bold.italic"
+      ),
+    panel.grid.minor.y = element_blank(),
+    panel.grid.major.x = element_blank(),
+    plot.caption = element_text(size = 9,
+                                hjust = 0.92,
+                                margin = margin(t = 0.2,
+                                                b = 0,
+                                                unit = "cm"),
+                                color = "#939184",
+                                family="Arial"
+                              )
+    )  +
+  scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 12.5))
+
+p
+ggsave("../images/bar-error-bars_subsidy-status_provider-type.png", dpi = 1200)
+ggsave(file.path(pth, "bar-error-bars_subsidy-status_provider-type.png"), dpi = 1200)
+ggsave("../images/bar-error-bars_subsidy-status_provider-type.svg")
+
+```
