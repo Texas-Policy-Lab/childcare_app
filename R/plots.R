@@ -60,7 +60,8 @@ map_cbsa <- function(ccs_map_data = ccs_map_data,
       legend.title=element_text(size=12, family="Arial"), 
       legend.text=element_text(size=11, family="Arial")
     ) +
-    scale_fill_manual(stringr::str_wrap("Child care seats per 100 children", 16), values=c("#ee9391", "#b199bf", "#5c67b1"), na.value = "grey")
+    scale_fill_manual(stringr::str_wrap("Child care seats per 100 children", 16),
+                      values=c("#ee9391", "#b199bf", "#5c67b1"), na.value = "grey")
 
   if(show_covid) {
     gg <- gg +
