@@ -212,7 +212,7 @@ dm.tx_counties_map <- function(tx_counties) {
 #' @inheritParams dm.workforce_board
 #' @export
 dm.pop <- function(pth) {
-  
+
   df <- readxl::read_xlsx(pth, sheet = 1) %>% 
     dplyr::mutate(Geography = gsub("Texas", "TX", `County Name`)) %>%
     dplyr::select(Geography, `County Name`, `Total Population`, `Total Households`,
@@ -226,7 +226,7 @@ dm.pop <- function(pth) {
                   n_ppl_hhld = n_pop/n_hhld,
                   pct_kid_under12 = (n_kid_under12/n_pop)*100,
                   n_kid_under12_per_100hhld = (n_kid_under12/n_hhld)*100)
-  
+
   return(df)
 }
 
@@ -235,12 +235,12 @@ dm.pop <- function(pth) {
 #' @inheritParams dm.occupations 
 #' @export
 dm.childdemand <- function(df, pop_data) {
-  
+
   df <- df %>%
     dplyr:: left_join(pop_data) %>%
     dplyr:: mutate(n_hhld_w_ess = phase2/n_ppl_hhld, 
                    n_kid_needcare = .75*(n_kid_under12_per_100hhld*n_hhld_w_ess)/100)
-  
+
   return(df)
   
 }
@@ -249,13 +249,13 @@ dm.childdemand <- function(df, pop_data) {
 #' @param pth string. The path to the excel file.
 #' @export
 dm.occ_read_data <- function(pth) {
-  
+
   # Read in data and change names
   df <- readxl::read_excel(pth, sheet = 2) %>%
     dplyr::rename(ind_occ_id = `ID Occupation`,
                   ind_occ = Occupation,
                   workforce = `Workforce by Occupation and Gender`)
-  
+
   return(df)
 }
 
@@ -263,13 +263,13 @@ dm.occ_read_data <- function(pth) {
 #' @param pth string. The path to the excel file.
 #' @export
 dm.ind_read_data <- function(pth) {
-  
+
   # Read in data and change names
   df <- readxl::read_excel(pth, sheet = 5) %>% 
     dplyr::rename(ind_occ_id = `ID Industry`,
                   ind_occ = Industry,
                   workforce = `Workforce by Industry and Gender`)
-  
+
   return(df)
 }
 
