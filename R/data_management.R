@@ -302,7 +302,7 @@ dm.essential_workforce <- function(df,
     dplyr::mutate(value = value/100,
                   workforce = workforce*value) %>% 
     dplyr::select(-c(value, Year))
-browser()
+
   return(df)
 }
 
