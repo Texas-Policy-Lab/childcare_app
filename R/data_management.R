@@ -276,15 +276,17 @@ dm.ind_read_data <- function(pth) {
 #' @title Data management to create the number of essential workers
 #' @param df dataframe. The data frame to apply data management steps to.
 #' @param essential_id vector. Vector of numeric ids indicating industries/occupations deemed essential in Texas.
-#' @param phase1_id vector. Vector of numeric ides indicating industries/occupations deemed essential in Texas.
+#' @param phase1_id vector. Vector of numeric ids indicating industries/occupations opened in phase 1 in Texas.
+#' @param phase2_id vector. Vector of numeric ids indicating industries/occupations opened in phase 2 in Texas.
+#' @param phase3_id vector. Vector of numeric ids indicating industries/occupations opened in phase 3 in Texas.
 #' @export
-dm.essential_workforce <- function(df, essential_id, phase1_id, phase2_id) {
+dm.essential_workforce <- function(df, essential_id, phase1_id, phase2_id, phase2_id) {
   
   # Select most recent years for each Geography and industry or occupation
   
   df <- df %>% 
     dplyr::select(Geography, ind_occ_id, ind_occ, Year, workforce) %>%
-    dplyr::filter(ind_occ_id %in% c(essential_id, phase1_id, phase2_id)) %>%
+    dplyr::filter(ind_occ_id %in% c(essential_id, phase1_id, phase2_id, phase3_id)) %>%
     dplyr::arrange(desc(Year)) %>%
     dplyr::group_by(Geography, ind_occ_id) %>%
     dplyr::slice(1) %>% 
@@ -297,6 +299,7 @@ dm.essential_workforce <- function(df, essential_id, phase1_id, phase2_id) {
     dplyr::mutate(essential = dplyr::if_else(ind_occ_id %in% essential_id, 1, 0),
                   phase1 = dplyr::if_else(ind_occ_id %in% c(essential_id, phase1_id), 1, 0),
                   phase2 = dplyr::if_else(ind_occ_id %in% c(essential_id, phase1_id, phase2_id), 1, 0),
+                  phase3 = dplyr::if_else(ind_occ_id %in% c(essential_id, phase1_id, phase2_id, phase3_id), 1, 0),
                   workforce = ifelse(ind_occ_id %in% phase1_id, .7*workforce, workforce),
                   workforce = ifelse(ind_occ_id %in% phase2_id, .78*workforce, workforce)) %>% 
     tidyr::gather(variable, value, -c(Geography, ind_occ_id, ind_occ, workforce))
@@ -337,9 +340,10 @@ dm.essential_workforce <- function(df, essential_id, phase1_id, phase2_id) {
 #' @inheritParams dm.read_occ_data
 #' @export
 dm.occ_essential_workforce <- function(pth, 
-                                       essential_id = c(23, 21, 19, 7, 13, 12, 9, 16, 10, 15, 11),
+                                       essential_id = c(7, 9, 10, 11, 12, 13, 15, 16, 19, 21, 23),
                                        phase1_id = c(14, 17),
-                                       phase2_id = c(8)) {
+                                       phase2_id = c(8),
+                                       phase3_id = c(0, 1, 2, 3, 5, 5, 6, 18)) {
 
   df <- dm.occ_read_data(pth = pth)
   df <- dm.essential_workforce(df = df, 
@@ -355,15 +359,17 @@ dm.occ_essential_workforce <- function(pth,
 #' @inheritParams dm.read_ind_data
 #' @export
 dm.ind_essential_workforce <- function(pth,
-                                       essential_id = c(15, 3, 14, 11, 6, 13, 4, 19, 8, 7),
-                                       phase1_id = c(16, 5),
-                                       phase2_id = c(17)) {
+                                       essential_id = c(3, 4, 6, 7, 8, 11, 13, 14, 15, 19),
+                                       phase1_id = c(5, 16),
+                                       phase2_id = c(17),
+                                       phase3_id = c(0, 1, 2, 9, 10, 12, 18)) {
 
   df <- dm.ind_read_data(pth = pth)
   df <- dm.essential_workforce(df = df, 
                                essential_id = essential_id, 
                                phase1_id = phase1_id,
-                               phase2_id = phase2_id)
+                               phase2_id = phase2_id,
+                               phase3_id = phase3_id)
   return(df)
 }
 
