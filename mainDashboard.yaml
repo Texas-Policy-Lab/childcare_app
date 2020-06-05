@@ -31,6 +31,8 @@ data:
   estimates: "./data/potential_supply_demand_county_53120.csv"
   population: "./data/Texas Population Data (2).xlsx"
   occ_ind: "./data/occupations.xlsx"
+  occ_reopen: "./data/occupation_reopening_pct.csv"
+  ind_reopen: "./data/industry_reopening_pct.csv"
 
 dshs:
   cases: "https://dshs.texas.gov/coronavirus/TexasCOVID19DailyCountyCaseCountData.xlsx"

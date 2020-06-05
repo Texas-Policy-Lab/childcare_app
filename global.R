@@ -56,6 +56,10 @@ map_tx_counties <- dm.tx_counties_map(tx_counties)
 
 pop_data <- dm.pop(pth = config$data$population)
 
-occ_data <- dm.occ_summary(pth = config$data$occ_ind, pop_data = pop_data)
+occ_data <- dm.occ_summary(pth = config$data$occ_ind, 
+                           reopen_pct_pth = config$data$occ_reopen,
+                           pop_data = pop_data)
 
-ind_data <- dm.ind_summary(pth = config$data$occ_ind, pop_data = pop_data)
+ind_data <- dm.ind_summary(pth = config$data$occ_ind,
+                           reopen_pct_pth = config$data$ind_reopen,
+                           pop_data = pop_data)

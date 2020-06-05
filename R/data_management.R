@@ -237,12 +237,17 @@ dm.pop <- function(pth) {
 dm.childdemand <- function(df, pop_data) {
 
   df <- df %>%
-    dplyr:: left_join(pop_data) %>%
-    dplyr:: mutate(n_hhld_w_ess = phase2/n_ppl_hhld, 
-                   n_kid_needcare = .75*(n_kid_under12_per_100hhld*n_hhld_w_ess)/100)
+    dplyr::left_join(pop_data) %>%
+    dplyr::mutate(n_hhld_w_ess = workforce/n_ppl_hhld,
+                  n_kid_needcare = .75*(n_kid_under12_per_100hhld*n_hhld_w_ess)/100) %>%
+    dplyr::select(Geography, reopening, workforce) %>%
+    tidyr::spread(reopening, workforce)
+
+  assertthat::assert_that(all(df$essential <= df$phase1))
+  assertthat::assert_that(all(df$phase1 <= df$phase2))
+  assertthat::assert_that(all(df$phase2 <= df$phase3))
 
   return(df)
-  
 }
 
 #' @title Read occupation data
@@ -275,101 +280,29 @@ dm.ind_read_data <- function(pth) {
 
 #' @title Data management to create the number of essential workers
 #' @param df dataframe. The data frame to apply data management steps to.
-#' @param essential_id vector. Vector of numeric ids indicating industries/occupations deemed essential in Texas.
-#' @param phase1_id vector. Vector of numeric ids indicating industries/occupations opened in phase 1 in Texas.
-#' @param phase2_id vector. Vector of numeric ids indicating industries/occupations opened in phase 2 in Texas.
-#' @param phase3_id vector. Vector of numeric ids indicating industries/occupations opened in phase 3 in Texas.
 #' @export
-dm.essential_workforce <- function(df, essential_id, phase1_id, phase2_id, phase2_id) {
-  
+dm.essential_workforce <- function(df,
+                                   reopen_pct_df) {
+
   # Select most recent years for each Geography and industry or occupation
-  
   df <- df %>% 
     dplyr::select(Geography, ind_occ_id, ind_occ, Year, workforce) %>%
-    dplyr::filter(ind_occ_id %in% c(essential_id, phase1_id, phase2_id, phase3_id)) %>%
     dplyr::arrange(desc(Year)) %>%
     dplyr::group_by(Geography, ind_occ_id) %>%
-    dplyr::slice(1) %>% 
+    dplyr::slice(1) %>%
     dplyr::ungroup()
 
   assertthat::assert_that(all(df$Year %in% c(2017, 2018)))
+  assertthat::assert_that(nrow(df) == length(unique(df$ind_occ_id))*254)
 
-  df <- df %>% 
-    dplyr::select(-Year) %>% 
-    dplyr::mutate(essential = dplyr::if_else(ind_occ_id %in% essential_id, 1, 0),
-                  phase1 = dplyr::if_else(ind_occ_id %in% c(essential_id, phase1_id), 1, 0),
-                  phase2 = dplyr::if_else(ind_occ_id %in% c(essential_id, phase1_id, phase2_id), 1, 0),
-                  phase3 = dplyr::if_else(ind_occ_id %in% c(essential_id, phase1_id, phase2_id, phase3_id), 1, 0),
-                  workforce = ifelse(ind_occ_id %in% phase1_id, .7*workforce, workforce),
-                  workforce = ifelse(ind_occ_id %in% phase2_id, .78*workforce, workforce)) %>% 
-    tidyr::gather(variable, value, -c(Geography, ind_occ_id, ind_occ, workforce))
-  
-  assertthat::assert_that(all(df%>% dplyr::filter(variable == "phase2")  %>% dplyr::select(value) == 1))
-  
-  df <- df %>% 
-    dplyr::filter(value == 1) %>% 
-    dplyr::select(-c(value))
-
-  x <- df %>%
-    dplyr::group_by(variable) %>%
-    dplyr::summarise(n = sum(workforce, na.rm = T))
-  
-  assertthat::assert_that(x %>%
-                            dplyr::filter(variable == "essential") %>%
-                            dplyr::select(n) %>%
-                            dplyr::pull(n) <
-                            x %>%
-                            dplyr::filter(variable == "phase1") %>%
-                            dplyr::select(n) %>%
-                            dplyr::pull(n))
-  
-  assertthat::assert_that(x %>%
-                            dplyr::filter(variable == "phase1") %>%
-                            dplyr::select(n) %>%
-                            dplyr::pull(n) <
-                            x %>%
-                            dplyr::filter(variable == "phase2") %>%
-                            dplyr::select(n) %>%
-                            dplyr::pull(n))
-
-  return(df)
-}
-
-#' @title Data management essential occupations
-#' @description Data management to create the number of essential workers for occupations
-#' @inheritParams dm.read_occ_data
-#' @export
-dm.occ_essential_workforce <- function(pth, 
-                                       essential_id = c(7, 9, 10, 11, 12, 13, 15, 16, 19, 21, 23),
-                                       phase1_id = c(14, 17),
-                                       phase2_id = c(8),
-                                       phase3_id = c(0, 1, 2, 3, 5, 5, 6, 18)) {
-
-  df <- dm.occ_read_data(pth = pth)
-  df <- dm.essential_workforce(df = df, 
-                               essential_id = essential_id,
-                               phase1_id = phase1_id,
-                               phase2_id = phase2_id)
-
-  return(df)
-}
-
-#' @title Data management essential industries
-#' @description Data management to create the number of essential works for industries
-#' @inheritParams dm.read_ind_data
-#' @export
-dm.ind_essential_workforce <- function(pth,
-                                       essential_id = c(3, 4, 6, 7, 8, 11, 13, 14, 15, 19),
-                                       phase1_id = c(5, 16),
-                                       phase2_id = c(17),
-                                       phase3_id = c(0, 1, 2, 9, 10, 12, 18)) {
-
-  df <- dm.ind_read_data(pth = pth)
-  df <- dm.essential_workforce(df = df, 
-                               essential_id = essential_id, 
-                               phase1_id = phase1_id,
-                               phase2_id = phase2_id,
-                               phase3_id = phase3_id)
+  df <- df %>%
+    dplyr::left_join(reopen_pct_df %>%
+                       dplyr::select(-ind_occ) %>% 
+                       tidyr::gather(reopening, value, -ind_occ_id)) %>% 
+    dplyr::mutate(value = value/100,
+                  workforce = workforce*value) %>% 
+    dplyr::select(-c(value, Year))
+browser()
   return(df)
 }
 
@@ -378,13 +311,12 @@ dm.ind_essential_workforce <- function(pth,
 dm.summarize_essential_workforce <- function(df) {
 
   df <- df %>%
-    dplyr::group_by(Geography, variable) %>%
+    dplyr::group_by(Geography, reopening) %>%
     dplyr::summarise(workforce = sum(workforce))%>%
-    tidyr::spread(variable, workforce) %>%
     dplyr::mutate(`County Name` = gsub("TX", "Texas", Geography)) %>%
     dplyr::ungroup()
 
-  assertthat::assert_that(nrow(df) == 254)
+  assertthat::assert_that(nrow(df) == 254*length(unique(df$reopening)))
 
   return(df)
 }
@@ -395,11 +327,18 @@ dm.summarize_essential_workforce <- function(df) {
 #' @inheritParams dm.childdemand
 #' @export
 dm.occ_summary <- function(pth,
+                           reopen_pct_pth,
                            pop_data) {
 
   # Read in occupation data and create new variables
-  df <- dm.occ_essential_workforce(pth = pth)
-
+  df <- dm.ind_read_data(pth = pth)
+  
+  reopen_pct_df <- readr::read_csv(reopen_pct_pth)
+  
+  # Compute the essential workforce for reopening in different phases
+  df <- dm.essential_workforce(df = df,
+                               reopen_pct_df)
+  
   # Summarize occupation data at the county level
   df <- dm.summarize_essential_workforce(df)
 
@@ -415,10 +354,17 @@ dm.occ_summary <- function(pth,
 #' @inheritParams dm.childdemand
 #' @export
 dm.ind_summary <- function(pth,
+                           reopen_pct_pth,
                            pop_data) {
 
-  # Read in industry data and create new variables
-  df <- dm.ind_essential_workforce(pth = pth)
+  # Read in occupation data and create new variables
+  df <- dm.ind_read_data(pth = pth)
+
+  reopen_pct_df <- readr::read_csv(reopen_pct_pth)
+
+  # Compute the essential workforce for reopening in different phases
+  df <- dm.essential_workforce(df = df,
+                               reopen_pct_df)
 
   # Summarize occupation data at the county level
   df <- dm.summarize_essential_workforce(df)
@@ -428,38 +374,3 @@ dm.ind_summary <- function(pth,
 
   return(df)
 }
-
-#' @title Data management for occupation breakdowns
-#' @inheritParams 
-#' @export
-dm.occ_breakdown <- function(pth) {
-
-  # Read in industry data and create new variables
-  df <- dm.occ_essential_workforce(pth = pth)
-
-  df <- df %>% 
-    tidyr::spread(variable, workforce) %>% 
-    dplyr::mutate(`County Name` = gsub("TX", "Texas", Geography))
-
-  assertthat::assert_that(nrow(df) == 14*254)
-
-  return(df)
-}
-
-#' @title Data management for industry breakdowns
-#' @inheritParams 
-#' @export
-dm.ind_breakdown <- function(pth) {
-
-  # Read in industry data and create new variables
-  df <- dm.ind_essential_workforce(pth = pth)
-
-  df <- df %>% 
-    tidyr::spread(variable, workforce) %>% 
-    dplyr::mutate(`County Name` = gsub("TX", "Texas", Geography))
-
-  assertthat::assert_that(nrow(df) == 20*254)
-
-  return(df)
-}
-
