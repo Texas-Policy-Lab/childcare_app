@@ -230,26 +230,6 @@ dm.pop <- function(pth) {
   return(df)
 }
 
-#' @title Data management for child demand data
-#' @param pop_data dataframe. Dataframe containing the population data at the county level.
-#' @inheritParams dm.occupations 
-#' @export
-dm.childdemand <- function(df, pop_data) {
-
-  df <- df %>%
-    dplyr::left_join(pop_data) %>%
-    dplyr::mutate(n_hhld_w_ess = workforce/n_ppl_hhld,
-                  n_kid_needcare = .75*(n_kid_under12_per_100hhld*n_hhld_w_ess)/100) %>%
-    dplyr::select(Geography, reopening, workforce) %>%
-    tidyr::spread(reopening, workforce)
-
-  assertthat::assert_that(all(df$essential <= df$phase1))
-  assertthat::assert_that(all(df$phase1 <= df$phase2))
-  assertthat::assert_that(all(df$phase2 <= df$phase3))
-
-  return(df)
-}
-
 #' @title Read occupation data
 #' @param pth string. The path to the excel file.
 #' @export
@@ -318,6 +298,26 @@ dm.summarize_essential_workforce <- function(df) {
 
   assertthat::assert_that(nrow(df) == 254*length(unique(df$reopening)))
 
+  return(df)
+}
+
+#' @title Data management for child demand data
+#' @param pop_data dataframe. Dataframe containing the population data at the county level.
+#' @inheritParams dm.occupations 
+#' @export
+dm.childdemand <- function(df, pop_data) {
+
+  df <- df %>%
+    dplyr::left_join(pop_data) %>%
+    dplyr::mutate(n_hhld_w_ess = workforce/n_ppl_hhld,
+                  n_kid_needcare = .75*(n_kid_under12_per_100hhld*n_hhld_w_ess)/100) %>%
+    dplyr::select(Geography, reopening, n_kid_needcare) %>%
+    tidyr::spread(reopening, n_kid_needcare)
+
+  assertthat::assert_that(all(df$essential <= df$phase1))
+  assertthat::assert_that(all(df$phase1 <= df$phase2))
+  assertthat::assert_that(all(df$phase2 <= df$phase3))
+  
   return(df)
 }
 
