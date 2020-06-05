@@ -277,11 +277,13 @@ dm.essential_workforce <- function(df,
 
   df <- df %>%
     dplyr::left_join(reopen_pct_df %>%
-                       dplyr::select(-ind_occ) %>% 
+                       dplyr::select(-ind_occ) %>%
                        tidyr::gather(reopening, value, -ind_occ_id)) %>% 
     dplyr::mutate(value = value/100,
                   workforce = workforce*value) %>% 
     dplyr::select(-c(value, Year))
+
+  assertthat::assert_that(sum(is.na(df$workforce)) == 0)
 
   return(df)
 }
@@ -332,7 +334,7 @@ dm.occ_summary <- function(pth,
 
   # Read in occupation data and create new variables
   df <- dm.occ_read_data(pth = pth)
-  
+
   reopen_pct_df <- readr::read_csv(reopen_pct_pth)
   
   # Compute the essential workforce for reopening in different phases
