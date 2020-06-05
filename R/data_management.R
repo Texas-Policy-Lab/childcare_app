@@ -331,7 +331,7 @@ dm.occ_summary <- function(pth,
                            pop_data) {
 
   # Read in occupation data and create new variables
-  df <- dm.ind_read_data(pth = pth)
+  df <- dm.occ_read_data(pth = pth)
   
   reopen_pct_df <- readr::read_csv(reopen_pct_pth)
   
