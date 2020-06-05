@@ -37,7 +37,7 @@ est_ccs <- dm.estimates_ccs(est = est,
                             tx_counties = tx_counties)
 
 est_d <- dm.estimates_demand(est = est,
-                            tx_counties = tx_counties)
+                             tx_counties = tx_counties)
 
 est_s <- dm.estimates_supply(est = est,
                              tx_counties = tx_counties)
