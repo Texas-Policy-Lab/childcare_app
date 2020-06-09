@@ -2,20 +2,20 @@ ind_occ,ind_occ_id,essential,phase1,phase2,phase3
 "Agriculture, Forestry, Fishing & Hunting",0,0,0,0,82
 "Mining, Quarrying, & Oil & Gas Extraction",1,0,0,0,82
 Construction,2,0,0,0,82
-Manufacturing,3,100,100,100,82
-Wholesale Trade,4,100,100,100,82
+Manufacturing,3,100,100,100,100
+Wholesale Trade,4,100,100,100,100
 Retail Trade,5,0,70,70,82
-Transportation & Warehousing,6,100,100,100,82
-Utilities,7,100,100,100,82
-Information,8,100,100,100,82
+Transportation & Warehousing,6,100,100,100,100
+Utilities,7,100,100,100,100
+Information,8,100,100,100,100
 Finance & Insurance,9,0,0,0,82
 Real Estate & Rental & Leasing,10,0,0,0,82
-"Professional, Scientific, & Technical Services",11,100,100,100,82
+"Professional, Scientific, & Technical Services",11,100,100,100,100
 Management of Companies & Enterprises,12,0,0,0,82
-Administrative & Support & Waste Management Services,13,100,100,100,82
-Educational Services,14,100,100,100,82
-Health Care & Social Assistance,15,100,100,100,82
+Administrative & Support & Waste Management Services,13,100,100,100,100
+Educational Services,14,100,100,100,100
+Health Care & Social Assistance,15,100,100,100,100
 "Arts, Entertainment, & Recreation",16,0,70,70,82
 Accommodation & Food Services,17,0,0,78,82
 "Other Services, Except Public Administration",18,0,0,0,82
-Public Administration,19,100,100,100,82
+Public Administration,19,100,100,100,100
