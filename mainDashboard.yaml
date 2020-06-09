@@ -28,7 +28,7 @@ ui:
 data:
   wfb: "./data/workforce_board_county.csv"
   tx_counties: "./data/tx_counties.csv"
-  estimates: "./data/potential_supply_demand_county_53120.csv"
+  estimates: "./data/potential_supply_demand_county_06052020.csv"
   population: "./data/Texas Population Data (2).xlsx"
   occ_ind: "./data/occupations.xlsx"
   occ_reopen: "./data/occupation_reopening_pct.csv"
