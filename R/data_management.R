@@ -48,8 +48,9 @@ dm.estimates_ccs <- function(est, tx_counties) {
     tidyr::gather(variable, est_ccs , -c(county_merge)) %>% 
     dplyr::mutate(est_ccs = ifelse(est_ccs == -9999, NA, est_ccs),
                   label = ifelse(est_ccs > 35, "> 35",
-                                 ifelse(est_ccs <= 35 & est_ccs > 15, "> 15 & <= 35", "< 15")),
-                  # label = factor(label),
+                                 ifelse(est_ccs <= 35 & est_ccs > 15, "> 15 & <= 35", "<= 15")),
+                  label = ordered(label,
+                                  levels = c("<= 15", "> 15 & <= 35", "> 35")),
                   demand = ifelse(grepl("Lower", variable), "Occupation", "Industry"),
                   supply = ifelse(grepl("Lsupply", variable), "Low",
                                   ifelse(grepl("Msupply", variable), "Medium", "High"))) %>% 
@@ -57,7 +58,7 @@ dm.estimates_ccs <- function(est, tx_counties) {
     dplyr::left_join(tx_counties %>% 
                        dplyr::mutate(county_merge = tolower(county))) %>% 
     dplyr::select(-county_merge)
-  
+
   assertthat::assert_that(sum(is.na(est_ccs$county_fips)) == 0)
   assertthat::assert_that(sum(is.na(est_ccs$county_name)) == 0)
   assertthat::assert_that(sum(is.na(est_ccs$wfb_name)) == 0)
