@@ -13,6 +13,8 @@ lapply(list.files("../images", full.names = TRUE), file.remove)
 
 pth <- "C:/Users/jh111/Box/Partnerships/TWC/Projects/COVID19 Childcare/Drafts/Data visuals/June 9"
 
+caption <- "Error bars represent ADA under low and high scenarios (high = low + one standard deviation of ADA as a percent of licensed capacity. The medium scenario, represented by the bar, is the midpoint between the high and low scenarios.)"
+
 ```
 
 ```{r}
@@ -41,6 +43,28 @@ df <- readr::read_csv("../data/ada_06052020.csv") %>%
                 value = value*100
                 ) %>% 
   dplyr::select(-c(group_id))
+
+tpl_theme <- function(p) {
+  p <- p +
+    theme_minimal() +
+    theme(
+       strip.text.x = element_text(
+      size = 12, color = "black", face = "bold.italic"
+      ),
+    panel.grid.minor.y = element_blank(),
+    panel.grid.major.x = element_blank(),
+    plot.caption = element_text(size = 9,
+                                hjust = 0,
+                                margin = margin(t = 0.2,
+                                                b = 0,
+                                                unit = "cm"),
+                                color = "#939184",
+                                family="Arial"
+                              )
+      )  +
+    scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 20))
+
+}
 
 ```
 
@@ -112,16 +136,9 @@ p <- ggplot(df %>%
   labs(x = "Provider type"
       ,y = "Percent"
       ,title = stringr::str_wrap("Average daily attendance as a percent of licensed capacity by provider type and subsidy status for the medium supply scenario", 70)
-       ) +
-  theme_minimal() +
-  theme(
-    strip.text.x = element_text(
-      size = 12, color = "black", face = "bold.italic"
-      ),
-    panel.grid.minor.y = element_blank(),
-    panel.grid.major.x = element_blank()
-    )  +
-  scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 12.5))
+       )
+
+p <- tpl_theme(p)
 
 p
 ggsave("../images/provider_type-medium_supply_scenario-subsidy.png", dpi = 1200)
@@ -142,16 +159,9 @@ p <- ggplot(df1
   geom_bar(stat = "identity", position = "dodge") +
   labs(x = "Provider type"
       ,y = "Percent"
-      ,title = stringr::str_wrap("Average daily attendance as a percent of licensed capacity by provider type and subsidy status under medium supply scenario", 70)) +
-  theme_minimal() +
-  theme(
-    strip.text.x = element_text(
-      size = 12, color = "black", face = "bold.italic"
-      ),
-    panel.grid.minor.y = element_blank(),
-    panel.grid.major.x = element_blank()
-    )  +
-  scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 12.5))
+      ,title = stringr::str_wrap("Average daily attendance as a percent of licensed capacity by provider type and subsidy status under medium supply scenario", 70))
+
+p <- tpl_theme(p)
 
 p
 ggsave("../images/avg-ada_medium-scenario_subsidy-status_provider-type.png", dpi = 1200)
@@ -176,25 +186,10 @@ p <- ggplot(df1, aes(x = prvdr_type, y = Medium)) +
  labs(x = "Provider type"
      ,y = "Percent"
      ,title = "ADA as a percent of licensed capacity by provider type"
-     ,caption = stringr::str_wrap("Error bars represent ADA under low and high scenarios (mean +/- std. deviation of ADA as a percent of licensed capacity)", 120)
-       ) +
-  theme_minimal() +
-  theme(
-    strip.text.x = element_text(
-      size = 12, color = "black", face = "bold.italic"
-      ),
-    panel.grid.minor.y = element_blank(),
-    panel.grid.major.x = element_blank(),
-    plot.caption = element_text(size = 9,
-                                hjust = 0.92,
-                                margin = margin(t = 0.2,
-                                                b = 0,
-                                                unit = "cm"),
-                                color = "#939184",
-                                family="Arial"
-                              )
-    )  +
-  scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 12.5))
+     ,caption = stringr::str_wrap(caption, 120)
+       )
+
+p <- tpl_theme(p)
 
 p
 ggsave("../images/bar-error-bars_subsidy-status_provider-type-overall.png", dpi = 1200)
@@ -212,24 +207,9 @@ p <- ggplot(df1
   geom_bar(stat = "identity", position = "dodge") +
   labs(x = "Provider type"
       ,y = "Percent"
-      ,title = stringr::str_wrap("Average daily attendance as a percent of licensed capacity by provider type and supply scenario", 70)) +
-  theme_minimal() +
-  theme(
-    strip.text.x = element_text(
-      size = 12, color = "black", face = "bold.italic"
-      ),
-    panel.grid.minor.y = element_blank(),
-    panel.grid.major.x = element_blank(),
-    plot.caption = element_text(size = 9,
-                                hjust = 0.92,
-                                margin = margin(t = 0.2,
-                                                b = 0,
-                                                unit = "cm"),
-                                color = "#939184",
-                                family="Arial"
-                              )
-    )  +
-  scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 12.5))
+      ,title = stringr::str_wrap("Average daily attendance as a percent of licensed capacity by provider type and supply scenario", 70))
+
+p <- tpl_theme(p)
 
 p
 ggsave("../images/avg-ada_supply-scenario_provider-type.png", dpi = 1200)
@@ -263,25 +243,10 @@ p <- ggplot(df1,
   labs(x = "Provider type"
        ,y = "Percent"
        ,title = "ADA as a percent of licensed capacity by provider type and subsidy status"
-       ,caption = stringr::str_wrap("Error bars represent ADA under low and high scenarios (mean +/- std. deviation of ADA as a percent of licensed capacity)", 90)
-       ) +
-    theme_minimal() +
-  theme(
-    strip.text.x = element_text(
-      size = 12, color = "black", face = "bold.italic"
-      ),
-    panel.grid.minor.y = element_blank(),
-    panel.grid.major.x = element_blank(),
-    plot.caption = element_text(size = 9,
-                                hjust = 0.92,
-                                margin = margin(t = 0.2,
-                                                b = 0,
-                                                unit = "cm"),
-                                color = "#939184",
-                                family = "Arial"
-                              )
-    )  +
-  scale_y_continuous(limits = c(0, 100), breaks = seq(0, 100, 12.5))
+       ,caption = stringr::str_wrap(caption, 90)
+       )
+
+p <- tpl_theme(p)
 
 p
 ggsave("../images/bar-error-bars_subsidy-status_provider-type.png", dpi = 1200)
