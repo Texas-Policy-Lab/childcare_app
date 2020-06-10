@@ -20,7 +20,7 @@ theme_map <- function(...) {
 map_cbsa <- function(ccs_map_data = ccs_map_data,
                      covid_map_data = covid_map_data,
                      show_covid,
-                     caption = "COVID-19 Source: DSHS data reported on {date}",
+                     caption = "COVID-19 Source: DSHS data reported on {date}\nEstimates have been updated based on phase 3 reopening requirements as of June 3, 2020",
                      tt = "County: {county}<br>Seats per 100: {est_ccs}<br>COVID Cases: {Cases}<br>COVID Deaths: {Deaths}") {
 
   gg <- ggplot(ccs_map_data, aes(x = long, y = lat)) +
@@ -50,7 +50,7 @@ map_cbsa <- function(ccs_map_data = ccs_map_data,
       panel.spacing = unit(c(-.1,0.2,.2,0.2), "cm"),
       panel.border = element_blank(),
       plot.caption = element_text(size = 10,
-                                  hjust = 0.92,
+                                  hjust = 0,
                                   margin = margin(t = 0.2,
                                                   b = 0,
                                                   unit = "cm"),
