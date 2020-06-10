@@ -51,7 +51,7 @@ dm.estimates_ccs <- function(est, tx_counties) {
                                  ifelse(est_ccs <= 35 & est_ccs > 15, "> 15 & <= 35", "<= 15")),
                   label = ordered(label,
                                   levels = c("<= 15", "> 15 & <= 35", "> 35")),
-                  demand = ifelse(grepl("Lower", variable), "Occupation", "Industry"),
+                  demand = ifelse(grepl("Lower", variable), "Industry", "Occupation"),
                   supply = ifelse(grepl("Lsupply", variable), "Low",
                                   ifelse(grepl("Msupply", variable), "Medium", "High"))) %>% 
     dplyr::select(-variable) %>%
@@ -74,7 +74,9 @@ dm.estimates_demand <- function(est, tx_counties) {
   est_d <- est %>% 
     dplyr::select(county_merge, LowerRangeOccupation, UpperRangeIndustry) %>%
     tidyr::gather(demand, est_demand , -c(county_merge)) %>%  
-    dplyr::mutate(demand = ifelse(grepl("Occupation", demand), "Occupation", "Industry")) %>% 
+    dplyr::mutate(demand = ifelse(grepl("Occupation", demand), "Occupation", "Industry"),
+                  est_demand = ifelse(est_demand == -9999, NA, est_demand)
+                  ) %>% 
     dplyr::left_join(tx_counties %>% 
                        dplyr::mutate(county_merge = tolower(county))) %>% 
     dplyr::select(-county_merge)
@@ -96,7 +98,8 @@ dm.estimates_supply <- function(est, tx_counties) {
     tidyr::gather(supply, est_supply, -c(county_merge)) %>% 
     dplyr::mutate(supply = dplyr::case_when(supply == "hi_supply" ~ "High",
                                              supply == "med_supply" ~ "Medium",
-                                             supply == "low_supply" ~ "Low")) %>% 
+                                             supply == "low_supply" ~ "Low"),
+                  est_supply = ifelse(est_supply == -9999, NA, est_supply)) %>% 
     dplyr::left_join(tx_counties %>% 
                        dplyr::mutate(county_merge = tolower(county))) %>% 
     dplyr::select(-county_merge)
