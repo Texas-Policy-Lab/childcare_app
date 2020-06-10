@@ -41,3 +41,6 @@ vignettes/*.pdf
 
 images/
 *.html
+
+data/archive
+data/frontline_operation
