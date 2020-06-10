@@ -11,9 +11,9 @@ set_tpl_theme()
 
 lapply(list.files("../images", full.names = TRUE), file.remove)
 
-pth <- "C:/Users/jh111/Box/Partnerships/TWC/Projects/COVID19 Childcare/Drafts/Data visuals/June 9"
+pth <- "C:/Users/jh111/Box/Partnerships/TWC/Projects/COVID19 Childcare/Data visuals/June 9"
 
-caption <- "Error bars represent ADA under low and high scenarios (high = low + one standard deviation of ADA as a percent of licensed capacity. The medium scenario, represented by the bar, is the midpoint between the high and low scenarios.)"
+caption <- "The bar represents enrollment rates in the medium scenario. Error bars represent enrollment rates under low and high scenarios. Low= ADA / licensed capacity; High= (ADA + one standard deviation)/ licensed capacity; Medium= mid point between high and low scenarios."
 
 ```
 
@@ -72,6 +72,97 @@ tpl_theme <- function(p) {
 
 ```{r}
 
+df1 <- df %>% 
+              dplyr::select(-c(low_scen, med_scen, high_scen, Scenario)) %>%
+              tidyr::spread(scenario, value)
+
+p <- ggplot(df1,
+  aes(x = forcats::fct_relabel(type,
+                               stringr::str_wrap,
+                               width = 5),
+      y = med_pct)) +
+  geom_bar(aes(fill = `Subsidy status`),
+           stat = "identity",
+           position = "dodge", alpha = 0.7) +
+  geom_errorbar(aes(
+     x = forcats::fct_relabel(type,
+                              stringr::str_wrap,
+                              width = 5), color = `Subsidy status`,
+                    ymin = low_pct,
+                    ymax = hi_pct),
+                width = 0.2, alpha = 0.9, size = 1.3, position = position_dodge(0.9)) +
+  facet_wrap(. ~ prvdr_type, scales = "free_x") + 
+  labs(x = "Provider type"
+       ,y = "Percent"
+       ,title = "ADA as a percent of licensed capacity by provider type and subsidy status"
+       ,caption = stringr::str_wrap(caption, 90)
+       )
+
+p <- tpl_theme(p)
+
+
+
+p1 <- ggplot(df %>% 
+         dplyr::filter(home_prvdr) %>% 
+         dplyr::select(-c(Scenario, med_scen, high_scen, low_scen)) %>% 
+         tidyr::spread(scenario, value)
+        , aes(x = forcats::fct_relabel(type,
+                                    stringr::str_wrap,
+                                    width = 5), y = med_pct)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_errorbar(aes(x = forcats::fct_relabel(type,
+                                    stringr::str_wrap,
+                                    width = 5),
+                    ymin = low_pct,
+                    ymax = hi_pct),
+                width = 0.2, alpha = 0.9, size = 1.3, position = position_dodge(0.9))
+  facet_wrap(. ~ `Subsidy status`) + 
+  labs(x = "Provider type"
+      ,y = "Percent"
+       ) +
+  theme_minimal() +
+  theme(
+    panel.grid.major.x = element_blank(),
+    strip.text.x = element_text(
+      size = 12, color = "black", face = "bold.italic"
+      )
+    ) +
+  ylim(0, 100)
+
+p2 <- ggplot(df %>% 
+         dplyr::filter(center_prvdr) 
+         , aes(x = forcats::fct_relabel(type,
+                                    stringr::str_wrap,
+                                    width = 5), y = value, fill = Scenario)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(. ~ `Subsidy status`) + 
+  labs(x = "Center size"
+      ,y = "Percent"
+       ) +
+  theme_minimal() +
+  theme(
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.y = element_blank(),
+    strip.text.x = element_text(
+      size = 12, color = "black", face = "bold.italic"
+      )
+    )  +
+  ylim(0, 100)
+
+p <- cowplot::plot_grid(p1, p2,
+                   ncol = 1,
+                   # labels = c('Home Providers', 'Center Providers'),
+                   label_size = 12,
+                   rel_widths = c(2, 2))
+p
+ggsave("../images/provider_type-supply_scenario-subsidy.png", dpi = 1200)
+ggsave(file.path(pth, "provider_type-supply_scenario-subsidy.png"), dpi = 1200)
+ggsave("../images/provider_type-supply_scenario-subsidy.svg")
+
+```
+
+```{r}
+
 p1 <- ggplot(df %>% 
          dplyr::filter(home_prvdr) 
         , aes(x = forcats::fct_relabel(type,
@@ -118,7 +209,7 @@ p <- cowplot::plot_grid(p1, p2,
                    rel_widths = c(2, 2))
 p
 ggsave("../images/provider_type-supply_scenario-subsidy.png", dpi = 1200)
-# ggsave(file.path(pth, "provider_type-supply_scenario-subsidy.png"), dpi = 1200)
+ggsave(file.path(pth, "provider_type-supply_scenario-subsidy.png"), dpi = 1200)
 ggsave("../images/provider_type-supply_scenario-subsidy.svg")
 
 ```
@@ -142,7 +233,7 @@ p <- tpl_theme(p)
 
 p
 ggsave("../images/provider_type-medium_supply_scenario-subsidy.png", dpi = 1200)
-# ggsave(file.path(pth, "provider_type-medium_supply_scenario-subsidy.png"), dpi = 1200)
+ggsave(file.path(pth, "provider_type-medium_supply_scenario-subsidy.png"), dpi = 1200)
 ggsave("../images/provider_type-medium_supply_scenario-subsidy.svg")
 
 ```
@@ -165,7 +256,7 @@ p <- tpl_theme(p)
 
 p
 ggsave("../images/avg-ada_medium-scenario_subsidy-status_provider-type.png", dpi = 1200)
-# ggsave(file.path(pth, "avg-ada_medium-scenario_subsidy-status_provider-type.png"), dpi = 1200)
+ggsave(file.path(pth, "avg-ada_medium-scenario_subsidy-status_provider-type.png"), dpi = 1200)
 ggsave("../images/avg-ada_medium-scenario_subsidy-status_provider-type.svg")
 
 ```
@@ -177,7 +268,7 @@ df1 <- df %>%
   tidyr::spread(Scenario, avg_ada)
 
 p <- ggplot(df1, aes(x = prvdr_type, y = Medium)) +
-  geom_bar(stat="identity",
+  geom_bar(stat = "identity",
            position = "dodge", alpha=0.7) +
   geom_errorbar(aes(x = prvdr_type,
                     ymin = Low,
@@ -193,7 +284,7 @@ p <- tpl_theme(p)
 
 p
 ggsave("../images/bar-error-bars_subsidy-status_provider-type-overall.png", dpi = 1200)
-# ggsave(file.path(pth, "bar-error-bars_subsidy-status_provider-type-overall.png"), dpi = 1200)
+ggsave(file.path(pth, "bar-error-bars_subsidy-status_provider-type-overall.png"), dpi = 1200)
 ggsave("../images/bar-error-bars_subsidy-status_provider-type-overall.svg")
 ```
 
@@ -213,7 +304,7 @@ p <- tpl_theme(p)
 
 p
 ggsave("../images/avg-ada_supply-scenario_provider-type.png", dpi = 1200)
-# ggsave(file.path(pth, "avg-ada_supply-scenario_provider-type.png"), dpi = 1200)
+ggsave(file.path(pth, "avg-ada_supply-scenario_provider-type.png"), dpi = 1200)
 ggsave("../images/avg-ada_supply-scenario_provider-type.svg")
 
 ```
@@ -250,7 +341,7 @@ p <- tpl_theme(p)
 
 p
 ggsave("../images/bar-error-bars_subsidy-status_provider-type.png", dpi = 1200)
-# ggsave(file.path(pth, "bar-error-bars_subsidy-status_provider-type.png"), dpi = 1200)
+ggsave(file.path(pth, "bar-error-bars_subsidy-status_provider-type.png"), dpi = 1200)
 ggsave("../images/bar-error-bars_subsidy-status_provider-type.svg")
 
 ```
