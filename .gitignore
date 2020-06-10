@@ -40,7 +40,6 @@ vignettes/*.pdf
 .Rproj.user
 
 images/
-*.html
 
 data/archive
 data/frontline_operation
