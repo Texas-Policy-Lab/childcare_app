@@ -44,3 +44,6 @@ images/
 
 data/archive
 data/frontline_operation
+rsconnect/
+specs/
+access_token.txt
