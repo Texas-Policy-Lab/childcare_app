@@ -125,13 +125,14 @@ read_dshs <- function(pth, tx_counties) {
   names(df) <- stringr::str_replace_all(names(df), "[\r|\n]" , " ")
 
   assertthat::assert_that(grepl("county", tolower(names(df)[1])))
-  
+
   df <- df %>% 
     dplyr::rename(county = 1) %>% 
-    dplyr::right_join(tx_counties %>% 
-                       dplyr::select(county)) %>% 
-    dplyr::select(-Population) %>% 
-    tidyr::gather(variable, value, -c(county)) %>% 
+    dplyr::mutate(county = toupper(county)) %>%
+    dplyr::right_join(tx_counties %>%
+                       dplyr::mutate(county = toupper(county)) %>%
+                       dplyr::select(county, county_fips)) %>%
+    tidyr::gather(variable, value, -c(county, county_fips)) %>% 
     dplyr::mutate(variable = gsub("Cases|Fatalities", "", variable),
                   variable = stringr::str_trim(variable, "both"),
                   value = as.numeric(value))
@@ -146,13 +147,12 @@ read_dshs <- function(pth, tx_counties) {
     df <- df %>% 
       dplyr::mutate(date = as.Date(as.numeric(variable), origin = "1899-12-30"))
   }
-  
-  df <- df %>%
-    dplyr::select(-variable) %>% 
-    dplyr::arrange(county, desc(date)) %>% 
-    dplyr::group_by(county) %>% 
-    dplyr::slice(1)
 
+  df <- df %>%
+    dplyr::select(-c(county, variable)) %>% 
+    dplyr::arrange(county_fips, desc(date)) %>% 
+    dplyr::group_by(county_fips) %>% 
+    dplyr::slice(1)
 }
 
 #' @title Data management cases
@@ -168,7 +168,8 @@ dm.cases <- function(pth, tx_counties) {
 #' @export
 dm.deaths <- function(pth, tx_counties) {
   read_dshs(pth, tx_counties) %>% 
-    dplyr::rename(Deaths = value)}
+    dplyr::rename(Deaths = value)
+}
 
 #' @title Data management covid data
 #' @param cases data.frame.
@@ -177,12 +178,13 @@ dm.deaths <- function(pth, tx_counties) {
 dm.covid <- function(cases, deaths, tx_counties) {
 
   covid <- cases %>% 
-    dplyr::left_join(deaths) %>% 
+    tidyr::gather(covid_metric, `Total # (COVID metrics)`, -c(county_fips, date)) %>% 
+    dplyr::bind_rows(deaths %>% 
+                       tidyr::gather(covid_metric, `Total # (COVID metrics)`, -c(county_fips, date))
+    ) %>% 
+    dplyr::left_join(tx_counties) %>% 
     dplyr::ungroup() %>% 
-    tidyr::gather(covid_metric, `Total # (COVID metrics)`, -c(county, date)) %>% 
-    dplyr::mutate(county = gsub("\n", " ", county)) %>% 
-    dplyr::select(-date) %>% 
-    dplyr::left_join(tx_counties)
+    dplyr::select(-date)
   
   assertthat::assert_that(sum(is.na(covid$county_fips)) == 0)
   assertthat::assert_that(sum(is.na(covid$county_name)) == 0)
