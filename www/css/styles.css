@@ -1,0 +1,80 @@
+
+body{
+  font-family: var(--main-fonts);
+  font-size: 15px;
+}
+
+.h1, .h2, .h3, .h4, .h5, .h6,
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--main-fonts);
+}
+
+table.dataTable.no-footer,
+table.dataTable thead th, 
+.dataTable thead td {
+  border: 1px solid white;
+}
+
+h1 {
+  color: var(--main-tpl-blue);
+  font-size: 24px;
+  text-align: center;
+}
+
+h2 {
+  font-weight: bold;
+  font-size: 20px;
+  margin-top: 0px;
+  text-align: center;
+  margin: 10px;
+}
+
+h3 {
+  font-weight: bold;
+  font-size: 16px;
+  margin: 0 0 10px 0;
+}
+
+h4 {
+  font-size: 14px;
+  margin: 0 0 10px 0;
+}
+
+/* Style the buttons inside the filter container */
+.pretty input:checked~.state.p-primary-o .icon,
+.pretty input:checked~.state.p-primary-o .svg,
+.pretty input:checked~.state.p-primary-o svg,
+.pretty.p-toggle .state.p-primary-o .icon,
+.pretty.p-toggle .state.p-primary-o .svg,
+.pretty.p-toggle .state.p-primary-o svg,
+.checkbox-bs-primary input[type="checkbox"]:checked + label::before,
+.checkbox-bs-primary input[type="radio"]:checked + label::before,
+.pretty.p-icon .state .icon,
+.checkbox-bs-primary input[type="checkbox"]:checked + label::after, 
+.checkbox-bs-primary input[type="radio"]:checked + label::after,
+.checkbox-bs label::after,
+.checkbox-bs label::before,
+.checkbox-bs-primary input[type="checkbox"]:checked + label::before,
+.checkbox-bs-primary input[type="radio"]:checked + label::before {
+  color: var(--grey-60-darker);
+  border-color: var(--grey-30-darker);
+  background-color: transparent;
+  border-radius: 0;
+  /*background-color: var(--grey-20-darker); */
+}
+
+.checkbox-bs label::after {
+  font-size: 12px;
+}
+
+a:active,
+a:focus,
+a:hover {
+  color: var(--main-tpl-red);
+}
+
+.shiny-options-group {
+  margin: 7px;
+  font-size: 14px;
+}
+

@@ -14,9 +14,12 @@ httr::set_config(httr::config(ssl_verifypeer = 0L))
 
 sapply(list.files("R", full.names = TRUE, recursive = TRUE), source, .GlobalEnv)
 
-config <- yaml::read_yaml("./mainDashboard.yaml")
+config <- yaml::read_yaml("./dashboard.yaml")
+
+## GLOBALS
 
 CAPTION <- config$caption
+TPL_URL <- config$tpl_url
 
 wfb <- dm.workforce_board(pth = config$data$wfb)
 
