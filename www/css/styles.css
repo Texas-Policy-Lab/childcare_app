@@ -39,6 +39,14 @@ h4 {
   margin: 0 0 10px 0;
 }
 
+li {
+  padding: 2px;
+}
+
+.tab-pane {
+  width: 95%;
+}
+
 /* Style the buttons inside the filter container */
 .pretty input:checked~.state.p-primary-o .icon,
 .pretty input:checked~.state.p-primary-o .svg,
