@@ -74,5 +74,10 @@ map_cbsa <- function(ccs_map_data = ccs_map_data,
     gg <- gg
   }
 
-  gg <- ggiraph::girafe(ggobj = gg, width_svg = 9, height_svg = 6.5)
+  tooltip_css <- "background-color:#666666;border-radius: 3px;color:#ffffff; padding: 3px;"
+  
+  gg <- ggiraph::ggiraph(code = {print(gg)},
+                         width_svg = 15, height_svg = 10.5,
+                         tooltip_extra_css = tooltip_css
+  )
 }
