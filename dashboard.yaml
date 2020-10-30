@@ -11,6 +11,8 @@ css: "www/css"
 js: "www/js"
 favicon: "images/favicon.png"
 
+tpl_url: "https://www.texaspolicylab.org/"
+
 ui:
   dashboardtitle:
     title: "Frontline Child Care"
