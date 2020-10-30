@@ -20,7 +20,6 @@ theme_map <- function(...) {
 map_cbsa <- function(ccs_map_data = ccs_map_data,
                      covid_map_data = covid_map_data,
                      show_covid,
-                     caption = "COVID-19 Source: DSHS data reported on {date}\nEstimates have been updated based on phase 3 reopening requirements as of June 3, 2020",
                      tt = "County: {county}<br>Seats per 100: {est_ccs}<br>COVID Cases: {Cases}<br>COVID Deaths: {Deaths}") {
 
   gg <- ggplot(ccs_map_data, aes(x = long, y = lat)) +
@@ -34,7 +33,7 @@ map_cbsa <- function(ccs_map_data = ccs_map_data,
          y = NULL,
          title = NULL,
          subtitle = "",
-         caption = glue::glue(caption, date = cases %>%
+         caption = glue::glue(CAPTION, date = cases %>%
                                 dplyr::ungroup() %>% 
                                 dplyr::distinct(date) %>% 
                                 dplyr::pull(date))) +
