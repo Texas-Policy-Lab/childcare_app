@@ -16,6 +16,8 @@ sapply(list.files("R", full.names = TRUE, recursive = TRUE), source, .GlobalEnv)
 
 config <- yaml::read_yaml("./mainDashboard.yaml")
 
+CAPTION <- config$caption
+
 wfb <- dm.workforce_board(pth = config$data$wfb)
 
 tx_counties <- dm.tx_counties(pth = config$data$tx_counties)
