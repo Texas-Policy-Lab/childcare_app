@@ -86,7 +86,7 @@ demand.ui <- function(wfb, est_ccs, covid) {
 
   shiny::fluidRow(
     shiny::fluidRow(
-      shiny::column(width = 3,
+      shiny::column(width = 2,
                     widget.wfb(wfb),
                     shiny::tags$div(
                       class = "est-container",
@@ -105,7 +105,7 @@ demand.ui <- function(wfb, est_ccs, covid) {
                       widget.covid_metric(covid)
                     )
                     ),
-      shiny::column(width = 9
+      shiny::column(width = 10
                     ,fluidRow(ggiraph::girafeOutput("demand_map"))
                     ,fluidRow(DT::dataTableOutput("estimate_table", width = "85%"))
 
