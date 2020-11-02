@@ -111,3 +111,42 @@ a:hover {
   width: 300px;
   margin-bottom: 15px;
 }
+
+/* Shiny picker widget dropdown styling */
+
+.dropdown-menu>.active>a,
+.dropdown-menu>.active>a:focus,
+.dropdown-menu>.active>a:hover {
+  background-color: var(--main-tpl-red);
+}
+
+.form-control:focus {
+  border-color: var(--main-tpl-red);
+}
+
+/* DT data table styling */
+
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+  background: linear-gradient(to bottom, #fff 0%, #fff 100%);
+  border: 1px solid var(--grey-20-darker);
+}
+
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+  color: var(--grey-60-darker)!important;
+  border: 1px solid var(--grey-20-darker);
+  background-color: var(--grey-10-darker);
+  background: linear-gradient(to bottom, #fff 0%, #fff 100%);
+}
+
+table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {
+  background-color: #ffffff;
+}
+
+.dataTables_wrapper .dataTables_length,
+.dataTables_wrapper .dataTables_filter,
+.dataTables_wrapper .dataTables_info,
+.dataTables_wrapper .dataTables_processing,
+.dataTables_wrapper .dataTables_paginate {
+  color: var(--grey-60-darker);
+}

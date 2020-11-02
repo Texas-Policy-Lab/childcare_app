@@ -260,14 +260,6 @@ h4 {
   font-size: 14px;
 }
 
-table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {
-  background-color: #ffffff;
-}
-
-.dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing, .dataTables_wrapper .dataTables_paginate {
-    color: var(--grey-60-darker);
-}
-
 th, td {
   font-size: 16px;
 }
