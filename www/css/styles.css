@@ -104,3 +104,10 @@ a:hover {
 .col-sm-2 {
   padding: 0 15px 0 30px;
 }
+
+#data-download {
+  float: left;
+  max-width: 100%;
+  width: 300px;
+  margin-bottom: 15px;
+}
