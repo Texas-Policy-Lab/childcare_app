@@ -26,12 +26,14 @@ h2 {
   font-size: 20px;
   margin-top: 0;
   margin: 10px;
+  margin-bottom: 7px;
 }
 
 h3 {
   font-weight: bold;
   font-size: 16px;
   margin: 0 0 10px 0;
+  margin-left: 12px;
 }
 
 h4 {
@@ -40,11 +42,16 @@ h4 {
 }
 
 li {
-  padding: 2px;
+  padding: 3px;
+  margin: 1px;
+}
+
+ul {
+  width: 95%;
 }
 
 .tab-pane {
-  width: 95%;
+  width: 93%;
 }
 
 /* Style the buttons inside the filter container */
@@ -85,3 +92,15 @@ a:hover {
   font-size: 14px;
 }
 
+.col-sm-3 {
+  max-width: 300px;
+}
+
+.col-sm-2 {
+  max-width: 215px;
+}
+
+.col-sm-3,
+.col-sm-2 {
+  padding: 0 15px 0 30px;
+}

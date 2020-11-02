@@ -5,11 +5,12 @@
 .form-group.shiny-input-container,
 .action-button,
 .covid-container,
-.est-container{
+.est-container {
   border-radius: 5px;
   border: 1px solid var(--grey-20-darker);
   padding: 7px 10px 7px 10px;
   margin-left: 10px;
+  background-color: white;
 }
 
 /* Widget label formatting */
@@ -18,7 +19,7 @@ h3, th {
   font-size: 1em;
   color: var(--grey-60-darker);
   margin-top: 0;
-  margin-bottom: 3px;
+  margin-bottom: 7px;
 }
 
 h4 {
@@ -225,12 +226,12 @@ input[type="checkbox"]:checked {
 /*Format COVID container */
 .covid-container > .form-group.shiny-input-container,
 .est-container > .form-group.shiny-input-container {
-    border: 1px solid var(--white);
-    margin-left: 0px;
-    padding-left: 0px;
-    padding-bottom: 0px;
-    padding-right: 0px;
-    margin-bottom: 0px;
+    border: 0;
+    margin-left: 0;
+    padding-left: 0;
+    padding-bottom: 0;
+    padding-right: 0;
+    margin-bottom: 0;
 }
 
 .covid-container,
@@ -255,5 +256,18 @@ h4 {
 }
 
 table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {
-    background-color: #ffffff;
+  background-color: #ffffff;
+}
+
+.dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing, .dataTables_wrapper .dataTables_paginate {
+    color: var(--grey-60-darker);
+}
+
+th, td {
+  font-size: 16px;
+}
+
+
+label {
+  color: var(--grey-60-darker);
 }
