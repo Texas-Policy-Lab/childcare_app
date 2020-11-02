@@ -25,7 +25,7 @@ map_cbsa <- function(ccs_map_data = ccs_map_data,
   gg <- ggplot(ccs_map_data, aes(x = long, y = lat)) +
     ggiraph::geom_polygon_interactive(aes(group = subregion, fill = label, 
                                             tooltip =  glue::glue(tt)),
-                                        color = "white"
+                                      color = "#f7f7f7"
                                         ) +
     coord_map() +
     theme_map() +
@@ -77,7 +77,7 @@ map_cbsa <- function(ccs_map_data = ccs_map_data,
   tooltip_css <- "background-color:#666666;border-radius: 3px;color:#ffffff; padding: 3px;"
   
   gg <- ggiraph::ggiraph(code = {print(gg)},
-                         width_svg = 15, height_svg = 10.5,
+                         width_svg = 15, height_svg = 10,
                          tooltip_extra_css = tooltip_css
   )
 }
