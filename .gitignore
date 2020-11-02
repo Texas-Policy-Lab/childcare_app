@@ -31,6 +31,11 @@ vignettes/*.pdf
 *_cache/
 /cache/
 
+
+renv/library
+renv/settings.dcf
+renv/.gitignore
+
 # Temporary files created by R markdown
 *.utf8.md
 *.knit.md
