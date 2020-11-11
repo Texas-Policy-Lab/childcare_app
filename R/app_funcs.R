@@ -103,7 +103,9 @@ demand.ui <- function(wfb, est_ccs, covid) {
                       widget.overlay_covid(),
                       shiny::h4("Metric"),
                       widget.covid_metric(covid)
-                    )
+                    ),
+                    shiny::downloadButton("data-download",
+                                          label = "Download data")
                     ),
       shiny::column(width = 9
                     ,fluidRow(ggiraph::girafeOutput("demand_map"))
@@ -208,6 +210,26 @@ demand.server <- function(input, output, session) {
                                  columnDefs = list(list(width = '75px', targets = "_all"))
                                 )
                   )
+  )
+  
+  output$`data-download` <- shiny::downloadHandler(
+    filename = function() {
+
+      if(input$wfbPicker == 0) {
+
+        paste0(paste("Texas child care", input$demandRadio, input$supplyRadio, "estimates", sep = " "), ".csv")
+      } else {
+
+        paste0(paste(wfb %>% 
+                       dplyr::filter(wfb_id %in% input$wfbPicker) %>% 
+                       dplyr::pull(wfb_name),
+                     "child care", input$demandRadio, input$supplyRadio, "estimates", sep = " "), ".csv")
+      }
+
+    },
+    content = function(file) {
+      write.csv(table(), file, row.names = FALSE)
+    }
   )
 
 }

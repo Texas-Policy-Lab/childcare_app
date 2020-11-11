@@ -1,0 +1,8 @@
+version: "0.0.1"
+deploy:
+  prod:
+    url: "childcare-supply-demand"
+    run: FALSE
+  dev:
+    url: "childcare-supply-demand-staging"
+    run: TRUE

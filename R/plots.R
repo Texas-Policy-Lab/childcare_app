@@ -20,13 +20,12 @@ theme_map <- function(...) {
 map_cbsa <- function(ccs_map_data = ccs_map_data,
                      covid_map_data = covid_map_data,
                      show_covid,
-                     caption = "COVID-19 Source: DSHS data reported on {date}\nEstimates have been updated based on phase 3 reopening requirements as of June 3, 2020",
                      tt = "County: {county}<br>Seats per 100: {est_ccs}<br>COVID Cases: {Cases}<br>COVID Deaths: {Deaths}") {
 
   gg <- ggplot(ccs_map_data, aes(x = long, y = lat)) +
     ggiraph::geom_polygon_interactive(aes(group = subregion, fill = label, 
                                             tooltip =  glue::glue(tt)),
-                                        color = "white"
+                                      color = "#f7f7f7"
                                         ) +
     coord_map() +
     theme_map() +
@@ -34,7 +33,7 @@ map_cbsa <- function(ccs_map_data = ccs_map_data,
          y = NULL,
          title = NULL,
          subtitle = "",
-         caption = glue::glue(caption, date = cases %>%
+         caption = glue::glue(CAPTION, date = cases %>%
                                 dplyr::ungroup() %>% 
                                 dplyr::distinct(date) %>% 
                                 dplyr::pull(date))) +
@@ -49,7 +48,7 @@ map_cbsa <- function(ccs_map_data = ccs_map_data,
       plot.margin = unit(c(.5,.5,.2,.5), "cm"),
       panel.spacing = unit(c(-.1,0.2,.2,0.2), "cm"),
       panel.border = element_blank(),
-      plot.caption = element_text(size = 10,
+      plot.caption = element_text(size = 12,
                                   hjust = 0,
                                   margin = margin(t = 0.2,
                                                   b = 0,
@@ -75,5 +74,10 @@ map_cbsa <- function(ccs_map_data = ccs_map_data,
     gg <- gg
   }
 
-  gg <- ggiraph::girafe(ggobj = gg, width_svg = 9, height_svg = 6.5)
+  tooltip_css <- "background-color:#666666;border-radius: 3px;color:#ffffff; padding: 3px;"
+  
+  gg <- ggiraph::ggiraph(code = {print(gg)},
+                         width_svg = 15, height_svg = 10,
+                         tooltip_extra_css = tooltip_css
+  )
 }
