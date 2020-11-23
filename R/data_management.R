@@ -33,7 +33,7 @@ dm.tx_counties <- function(pth) {
 dm.estimates <- function(pth) {
 
   est <- readr::read_csv(pth) %>%
-    dplyr::rename(county_merge = COUNTY) %>% 
+    dplyr::rename(county_merge = County) %>% 
     dplyr::mutate(county_merge = tolower(county_merge))
 }
 

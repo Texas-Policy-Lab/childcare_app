@@ -5,6 +5,7 @@ body {
   font-weight: normal;
   color: var(--main-tpl-blue);
   height: 95%;
+  margin-left: 10px
 }
 
 .wrapper {
@@ -21,6 +22,11 @@ body {
 
 h1, h2, h4, h5, h6, span {
   font-family: var(--main-fonts);
+}
+
+p,
+table {
+  margin-left: 12px;
 }
 
 /* Page title formatting */

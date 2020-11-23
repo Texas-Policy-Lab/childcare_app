@@ -40,11 +40,12 @@ a.btn {
   text-align: center;
   transition: all .3s cubic-bezier(.55,.085,0,.99);
   float: right;
-  border-radius: 0%;
+  border-radius: 0;
   font-weight: bold;
 }
 
-a.btn:hover {
+a.btn:hover,
+#data-download:hover {
   background-color: #bf0a30;
   color: var(--white);
 }
@@ -130,6 +131,6 @@ footer .first-row {
 }
 
 footer .footer_contact p {
-  margin: 0px;
+  margin: 0;
 }
 

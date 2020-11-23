@@ -1,97 +1,91 @@
-<h3>Supply of child care seats during the COVID-19 pandemic</h3>
-<ul>
-  <li>
-We utilize data provided by TWC from the Frontline Operation list as of June 4, 2020, which indicates the location of child care providers that are currently open, average daily attendance (ADA) for providers choosing to report this information, whether or not they accept the subsidy and additional available seats for providers choosing to report this information.
-  </li>
-  <li>
-We merged the Frontline Operation list with publicly available data from Child Care Licensing to gather total licensed capacity of each child care program currently open in Texas.  This dataset also includes additional variables such as ages of children served, available hours.
-  </li>
-  <li>
-    This update is the first opportunity we have had to examine average daily attendance, as reported by a subset of child care providers (nearly 4,745 providers of 9,541 open child care providers reported average daily attendance). Given missing data for nearly half of open child care programs, we estimated ADA for those not reporting by:
-    <ul>
-      <li>
-        Categorizing providers according to the following dimensions, which are variables that, according to our model, predict ADA:
+<!DOCTYPE html>
+  <html>
+    <body>
+      <h2>Supply of child care seats during the COVID-19 pandemic</h2>
+      <h3>Data</h3>
+      <ul>
+        <li>
+          <a href="https://frontlinechildcare.texas.gov/">TWC's Frontline Operation from August, 2020</a>
+        </li>
+        <li>
+          <a href = "https://data.texas.gov/Social-Services/HHSC-CCL-Daycare-and-Residential-Operations-Data/bc5r-88dy">Child Care Licensing data</a>
+        </li>
+      </ul>
+
+      <h3>Methdology</h3>
+         <p>TWC launched a new application in April, 2020, to help collect data on the supply of child care in the state of Texas. Data on child care seat availability and average daily attendance (ADA) are collected at the provider level. During the month of August, 2020, the time period in which attendance data was most recently collected, 33% (3,614 of 10,928) of open child care providers reported ADA. To estimate the supply of child care in August, we extrapolate ADA for the two-thirds of child care providers which did not report ADA. 
+      </p>
+      <p>First, we merge ADA attendance data with publicly available data from Child Care Licensing to include additional variables such as the type of care, subsidy status, age groups served, and licensed capacity. Providers are then categorized according to the following dimensions, which are predictive of ADA:</p>
+      <ul>
+        <li>
+          Type of care (center vs homes)
+        </li>
+        <li>
+          Subsidy acceptance status
+        </li>
+        <li>
+          Age groups served
+        </li>
+        <li>
+          Licensed capacity
+        </li>
+        <li>
+          County’s total population
+        </li>
+      </ul>
+      <p>Next, we match two providers that have exactly the same dimensions for the first four variables and are in counties with similar populations. For each group, we compute the average and standard deviation of ADA. In this step, we only used the providers – within each group – that reported ADA. We use the mean ADA for the group as our estimate for the ADA for the providers in the same group that are open but do not report ADA.  This extrapolation results in complete data for all providers in all counties. </p>
+        <p>Finally, we created three supply scenarios specific to each county based on current enrollment for each county:  
+        </p>
         <ul>
           <li>
-            Type of care (center vs homes)
+      Low scenario: Current enrollment as the ratio of licensed capacity (ADA/licensed capacity). 
           </li>
           <li>
-            Subsidy acceptance status
+      Medium scenario: the mid point between low and high scenarios.
           </li>
           <li>
-            Age groups served
-          </li>
-          <li>
-            Licensed capacity
-          </li>
-          <li>
-            County’s total population
+      High scenario: ADA + 1 standard deviation divided by licensed capacity.
           </li>
         </ul>
-      </li>
-      <li>
-Two providers that are in the same group have exactly the same values for the first four variables and they are in counties that have similar (but not exactly the same) population.
-      <li>
-For each group, we compute the average and standard deviation of ADA. In this step, we only used the providers – within each group – that reported ADA. 
-      </li>
-      <li>
-We use the mean ADA for the group as our estimate for the ADA for the providers in the same group that are open but do not report ADA.  This extrapolation results in complete data for all counties.
-      </li>
-    </ul>
-  </li>
-  <li>
-We created three supply scenarios specific to each county based on current enrollment for each county:
-  </li>
-  <ul>
-    <li>
-Low scenario: Current enrollment as the ratio of licensed capacity (ADA/licensed capacity). 
-    </li>
-    <li>
-Medium scenario: the mid point between low and high scenarios.
-    </li>
-    <li>
-High scenario: ADA + 1 standard deviation divided by licensed capacity.
-    </li>
-  </ul>
-  <li>
-At this time, we are unable to integrate the data on additional available slots to estimate supply.  We are finding that nearly a third of providers are providing neither ADA nor availability data, which would require two extrapolations that would greatly increase the uncertainty of our estimates.  In addition, a significant portion of providers are reporting available slots that would put them well above licensed capacity and we need to further understand why this would be the case.  Nevertheless, we were able to utilize data on available slots to validate our “high” scenario.
-  </li>
-</ul>
 
-<h3>Demand for child care among current workforce</h3>
-<ul>
-  <li>
-    We utilized population data by county from the Census and American Community Survey 1-year estimates (2018), including estimates for the total number of people in the workforce by industry and occupation.  We applied the following assumptions:
-    <ul>
-      <li>
-Given publicly available data, demand can be estimated by either using relevant industries or relevant occupations.  We selected industries and occupations deemed essential and added those recently reopened at a reduced capacity.  Please note that workforce estimates by industry are higher than estimates by occupation, so we consider estimates by industry the upper bound of potential demand estimates.  See the appendix for industries and occupations included.
-      </li>
-      <li>
-We take a county’s population and total number of households to estimate the average number of people per household.  We assume that households from our industries of interest follow these typical figures and estimate the total number of households with workers in our industries of interest.
-      </li>
-      <li>
-Census provides the proportion of the population younger than 18 years old in each county. Assuming uniform distribution across ages younger than 18, we estimate the percent of the population 12 years old or younger. We use this to estimate the number of children under age 12 per 100 households.
-      </li>
-      <li>
-We estimate the number of children under age 12 per 100 households in need of child care by adjusting for whether or not households contain other non-working adults or older sibling that can provide care for some children in the household.  To do this we use Current Population Survey (Census and Bureau of Labor Statistics) data on the proportion of workers who do not have other adults/ older children in the home or who are single parents.
-      </li>
-      <li>
-We estimate the number of children who may need child care in our industries of interest by utilizing the number of households with workers in these industries and the rate of children under age 12 who need of child care per 100 households.
-      </li>
-    </ul>
-  </li>
-  <li>
-Given the third phase of reopening businesses in Texas, we adjusted workforce estimates in an attempt to account for these changes.  The most significant update for demand estimates relates to all business operating at 50% capacity.
-  </li>
-  <li>
-The foot traffic data indicated that foot activity – overall across the state – was already around 72%. In some locations, it was even higher (i.e., Harris County, 77%). This higher level of foot activity is possible, for example, if there is little monitoring of activity. Thus, we considered scenarios in which capacity were at 65% and 85%.
-  </li>
-  <li>
-To estimate the number of workers in scenarios for client capacity, we use SafeGraph  cell phone data that provides information about the number of visits to all businesses and the number of workers based on cell phone activity. Specifically, we combine data for two periods. The first period extends from January 1, 2019 to April 30, 2019. The second period extends from January 1, 2020 to April 30, 2020. We estimate the number of clients according to the number of “short” visits to the locations. We define short visits are visits that last at most three hours. We estimate the number of workers according to the number of “long” visits to the locations. Long visits are visits that last at least three hours. 
-  </li>
-  <li>We compute these figures for the two periods described above. Then, we take the ratio of (1) for 2020 to 2019. In the 2019 period, there was no pandemic, so we assume that the businesses were operating at full capacity. In the 2020 period, there was no pandemic in the first two months of the year, but the situation starts to change in early March 2020. Therefore, after the pandemic started, we observe weeks in which the number of clients were at 65% and 85% of full capacity relative to the same week in 2019. We use these data to estimate the fraction of workers that corresponds to different levels of operating capacity.  
-  </li>
-<li>
-  If we base capacity at 65% and 85% capacity, then we project that we will have 76% and 88% work activity (relative to the same week in 2019). The middle point is 82%, which we take as our preferred estimate for the portion of the workforce in non-essential industries that would be active given phase three reopening. 
-</li>
-</ul>
+        <p>At this time, we are unable to integrate the data on additional available slots to estimate supply. Currently, two-thirds of providers are not reporting ADA nor availability data. Extrapolating availability data would require two extrapolations and would greatly increase the uncertainty of our estimates. Additionally, a significant portion of providers are reporting available slots that would put them well above licensed capacity and we need to further understand why this would be the case.  Nevertheless, we were able to utilize data on available slots to validate our "high" scenario.</p>
+      
+    <h2>Demand for child care among current workforce estimates</h2>
+    
+    <h3>Data</h3>
+      <ul>
+        <li>
+          <a href="https://data.census.gov/cedsci/table?q=households&g=0400000US48.050000&tid=ACSST5Y2018.S1101&hidePreview=true">ACS Households and Families 1-year estimates (2018) table</a>
+        </li>
+        <li>
+          <a href="https://data.census.gov/cedsci/table?q=population&g=0400000US48.050000&tid=ACSDP1Y2018.DP05&hidePreview=true">ACS Housing and Demographics 5-year estimates (2018) table</a>
+        </li>
+        <li> 
+        <a href="https://data.census.gov/cedsci/table?q=population&g=0400000US48.050000&tid=ACSDP5Y2018.DP05&hidePreview=true">ACS Housing and Demographis 1-year estimates (2018) table</a>
+        </li>
+        <li>
+          <a href="https://datausa.io/profile/geo/texas">Data USA Industry and Employment data</a>
+        </li>
+      </ul>
+      
+      <h3>Methodology</h3>
+      
+      <p>Demand for child care estimates are created utilizing household population data from the American Community Survey (ACS), workforce industry and occupation employment data from Data USA, and SafeGraph cell phone data. Demand for child care is estimated using both industry and occupation estimates. Please note that workforce estimates by industry are higher than estimates by occupation, so we consider estimates by industry the upper bound of potential demand estimates. See the appendix for industries and occupations included.</p>
+
+      <p>First, we take a county’s population and total number of households to estimate the average number of people per household. We assume that households from our industries of interest follow these typical figures and estimate the total number of households with workers in our industries of interest.</p>
+
+      <p>Next, we estimate the percent of the populatin under 13, by assuming a uniform distribution of child ages younger than 18 and applying that to the proportion of the population youth than 18-years in each county. We use this to estimate the number of children under age 12 per 100 households. We adjust the estimate of the number of children under age 12 per 100 households according to whether or not households contain other non-working adults or older sibling that can provide care for some children in the household.  To do this we use Current Population Survey (Census and Bureau of Labor Statistics) data on the proportion of workers who do not have other adults/ older children in the home or who are single parents.</p>
+
+      <p>Finally, we adjust the estimates to reflect the reduced operating capacity of certain industries and occupations as of August, 2020. Estimates are adjusted by using foot traffic data to indicate overall foot activity. In June, overall foor activit was already around 72%. In some locations, it was even higher (i.e., Harris County, 77%). This higher level of foot activity is possible, for example, if there is little monitoring of activity. Thus, we considered scenarios in which capacity were at 65% and 85%.</p>
+
+      <p>To estimate the number of workers in scenarios for client capacity, we use SafeGraph cell phone data that provides information about the number of visits to all businesses and the number of workers based on cell phone activity. Specifically, we combine data for two periods. The first period extends from January 1, 2019 to April 30, 2019. The second period extends from January 1, 2020 to April 30, 2020. We estimate the number of clients according to the number of "short" visits to the locations. We define short visits are visits that last at most three hours. We estimate the number of workers according to the number of "long" visits to the locations. Long visits are visits that last at least three hours. </p>
+        
+      <p>We compute these figures for the two periods described above. Then, we take the ratio of (1) for 2020 to 2019. In the 2019 period, there was no pandemic, so we assume that the businesses were operating at full capacity. In the 2020 period, there was no pandemic in the first two months of the year, but the situation starts to change in early March 2020. Therefore, after the pandemic started, we observe weeks in which the number of clients were at 65% and 85% of full capacity relative to the same week in 2019. We use these data to estimate the fraction of workers that corresponds to different levels of operating capacity.  
+      </p>
+      <p>If we base capacity at 65% and 85% capacity, then we project that we will have 76% and 88% work activity (relative to the same week in 2019). The middle point is 82%, which we take as our preferred estimate for the portion of the workforce in non-essential industries that are not fully operational. </p>
+    
+    
+  </body>
+</html>
+
+

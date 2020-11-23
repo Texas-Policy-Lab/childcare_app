@@ -5,11 +5,13 @@
 .form-group.shiny-input-container,
 .action-button,
 .covid-container,
-.est-container{
+.est-container, 
+#data-download {
   border-radius: 5px;
   border: 1px solid var(--grey-20-darker);
   padding: 7px 10px 7px 10px;
   margin-left: 10px;
+  background-color: white;
 }
 
 /* Widget label formatting */
@@ -18,7 +20,7 @@ h3, th {
   font-size: 1em;
   color: var(--grey-60-darker);
   margin-top: 0;
-  margin-bottom: 3px;
+  margin-bottom: 7px;
 }
 
 h4 {
@@ -30,8 +32,10 @@ h4 {
 }
 /* Action Button */
 /*-----------------------------------------------------------------------*/
-.action-button {
-    background-color: #ffffff;
+.action-button,
+#data-download{
+  background-color: #f7f7f7;
+  color: var(--grey-60-darker);
 }
 
 /* Date Ranges */
@@ -224,13 +228,15 @@ input[type="checkbox"]:checked {
 
 /*Format COVID container */
 .covid-container > .form-group.shiny-input-container,
-.est-container > .form-group.shiny-input-container {
-    border: 1px solid var(--white);
-    margin-left: 0px;
-    padding-left: 0px;
-    padding-bottom: 0px;
-    padding-right: 0px;
-    margin-bottom: 0px;
+.est-container > .form-group.shiny-input-container,
+.est-container > h3,
+.covid-container > h3 {
+  border: 0;
+  margin-left: 0;
+  padding-left: 0;
+  padding-bottom: 0;
+  padding-right: 0;
+  margin-bottom: 0;
 }
 
 .covid-container,
@@ -254,6 +260,11 @@ h4 {
   font-size: 14px;
 }
 
-table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {
-    background-color: #ffffff;
+th, td {
+  font-size: 16px;
+}
+
+
+label {
+  color: var(--grey-60-darker);
 }

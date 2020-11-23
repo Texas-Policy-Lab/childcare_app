@@ -1,15 +1,8 @@
-version: "0.0.1"
-deploy:
-  prod:
-    url: "childcare-supply-demand"
-    run: FALSE
-  dev:
-    url: "childcare-supply-demand-staging"
-    run: TRUE
-
 css: "www/css"
 js: "www/js"
 favicon: "images/favicon.png"
+
+tpl_url: "https://www.texaspolicylab.org/"
 
 ui:
   dashboardtitle:
@@ -24,16 +17,14 @@ ui:
       menu_title: "Documentation"
       icon: "book"
       page_title: "Documentation"
-  
+
 data:
   wfb: "./data/workforce_board_county.csv"
   tx_counties: "./data/tx_counties.csv"
-  estimates: "./data/potential_supply_demand_county_06052020.csv"
-  population: "./data/Texas Population Data (2).xlsx"
-  occ_ind: "./data/occupations.xlsx"
-  occ_reopen: "./data/occupation_reopening_pct.csv"
-  ind_reopen: "./data/industry_reopening_pct.csv"
+  estimates: "/mnt_ec/03_Harris_county/potential_supply_demand_county_august.csv"
 
 dshs:
   cases: "https://dshs.texas.gov/coronavirus/TexasCOVID19DailyCountyCaseCountData.xlsx"
   deaths: "https://dshs.texas.gov/coronavirus/TexasCOVID19DailyCountyFatalityCountData.xlsx"
+  
+caption: "COVID-19 Source: DSHS data reported on {date}\nEstimates have been updated based on reopening requirements as of August, 2020"
