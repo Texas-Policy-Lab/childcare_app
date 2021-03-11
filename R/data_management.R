@@ -135,20 +135,8 @@ read_dshs <- function(pth, tx_counties) {
     tidyr::gather(variable, value, -c(county, county_fips)) %>% 
     dplyr::mutate(variable = gsub("Cases|Fatalities", "", variable),
                   variable = stringr::str_trim(variable, "both"),
-                  value = as.numeric(value))
-
-  if(any(is.na(as.numeric(df$variable)))) {
-
-    df <- df %>%
-      dplyr::mutate(variable = paste0(variable, "-2020"),
-                    date = lubridate::mdy(variable))
-
-  } else {
-    df <- df %>% 
-      dplyr::mutate(date = as.Date(as.numeric(variable), origin = "1899-12-30"))
-  }
-
-  df <- df %>%
+                  value = as.numeric(value),
+                  date = lubridate::mdy(variable)) %>%
     dplyr::select(-c(county, variable)) %>% 
     dplyr::arrange(county_fips, desc(date)) %>% 
     dplyr::group_by(county_fips) %>% 
